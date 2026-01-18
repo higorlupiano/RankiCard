@@ -30,6 +30,11 @@ export default function App() {
   const [syncMsg, setSyncMsg] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
+  // Timer state (elevated to persist across tab changes)
+  const [isStudying, setIsStudying] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [sessionXP, setSessionXP] = useState(0);
+
   // Handle Strava OAuth callback
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -369,6 +374,12 @@ export default function App() {
                     todayStudyXP={todayStudyXP}
                     onComplete={handleStudyComplete}
                     onLog={setLogMsg}
+                    isStudying={isStudying}
+                    setIsStudying={setIsStudying}
+                    timeLeft={timeLeft}
+                    setTimeLeft={setTimeLeft}
+                    sessionXP={sessionXP}
+                    setSessionXP={setSessionXP}
                   />
                 </div>
               )}

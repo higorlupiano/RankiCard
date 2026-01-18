@@ -1,16 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { formatTime, SESSION_SHORT_MIN, SESSION_LONG_MIN, XP_PER_MINUTE_STUDY, STUDY_DAILY_CAP } from '../../utils/gameLogic';
 
 interface StudyTimerProps {
     todayStudyXP: number;
     onComplete: (xp: number) => void;
     onLog: (message: string) => void;
+    // Estado elevado para App.tsx
+    isStudying: boolean;
+    setIsStudying: (v: boolean) => void;
+    timeLeft: number;
+    setTimeLeft: (v: number | ((prev: number) => number)) => void;
+    sessionXP: number;
+    setSessionXP: (v: number) => void;
 }
 
-export const StudyTimer: React.FC<StudyTimerProps> = ({ todayStudyXP, onComplete, onLog }) => {
-    const [isStudying, setIsStudying] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(0);
-    const [sessionXP, setSessionXP] = useState(0);
+export const StudyTimer: React.FC<StudyTimerProps> = ({
+    todayStudyXP,
+    onComplete,
+    onLog,
+    isStudying,
+    setIsStudying,
+    timeLeft,
+    setTimeLeft,
+    sessionXP,
+    setSessionXP
+}) => {
+    const completedRef = useRef(false);
 
     // Timer countdown
     useEffect(() => {
@@ -18,14 +33,22 @@ export const StudyTimer: React.FC<StudyTimerProps> = ({ todayStudyXP, onComplete
 
         if (isStudying && timeLeft > 0) {
             interval = setInterval(() => {
-                setTimeLeft((prev) => prev - 1);
+                setTimeLeft((prev: number) => prev - 1);
             }, 1000);
-        } else if (isStudying && timeLeft === 0) {
+        } else if (isStudying && timeLeft === 0 && !completedRef.current) {
+            completedRef.current = true;
             completeSession();
         }
 
         return () => clearInterval(interval);
     }, [isStudying, timeLeft]);
+
+    // Reset completedRef when starting new session
+    useEffect(() => {
+        if (isStudying && timeLeft > 0) {
+            completedRef.current = false;
+        }
+    }, [isStudying]);
 
     const startSession = (minutes: number) => {
         const potentialXP = minutes * XP_PER_MINUTE_STUDY;
@@ -50,6 +73,7 @@ export const StudyTimer: React.FC<StudyTimerProps> = ({ todayStudyXP, onComplete
     const cancelSession = () => {
         setIsStudying(false);
         setTimeLeft(0);
+        completedRef.current = false;
         onLog('❌ Sessão cancelada.');
     };
 
