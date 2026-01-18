@@ -254,11 +254,11 @@ export default function App() {
 
   const handleStravaDisconnect = async () => {
     if (!confirm('Desvincular Strava?')) return;
+    // Note: NÃO resetamos strava_last_sync para evitar reprocessar atividades antigas
     await updateProfile({
       strava_refresh_token: null,
       strava_access_token: null,
       strava_expires_at: null,
-      strava_last_sync: 0,
     });
     setSyncMsg('');
     setLogMsg('Strava desvinculado.');
