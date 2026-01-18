@@ -85,6 +85,10 @@ export default function App() {
               access_token: accessToken,
               refresh_token: refreshToken,
             });
+
+            // Close the browser after successful auth
+            const { Browser } = await import('@capacitor/browser');
+            await Browser.close();
           }
         }
       }
@@ -109,6 +113,10 @@ export default function App() {
                 access_token: accessToken,
                 refresh_token: refreshToken,
               });
+
+              // Close the browser after successful auth
+              const { Browser } = await import('@capacitor/browser');
+              await Browser.close();
             }
           }
         }
