@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">RankiCard</string>
+    <string name="title_activity_main">RankiCard</string>
+    <string name="package_name">com.rankicard.app</string>
+    <string name="custom_url_scheme">com.rankicard.app</string>
+</resources>
