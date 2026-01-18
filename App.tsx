@@ -309,7 +309,7 @@ export default function App() {
         </div>
 
         {/* Layer 2: The Content Container */}
-        <div className="absolute inset-0 z-20 flex flex-col pt-12 pb-24 px-8 md:px-10 overflow-visible">
+        <div className="absolute inset-0 z-20 flex flex-col pt-12 pb-24 px-8 md:px-10 overflow-y-auto">
 
           {/* Header Banner */}
           <HeaderBanner title={`${title} - Rank ${rank}`} />
