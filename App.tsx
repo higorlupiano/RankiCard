@@ -411,7 +411,7 @@ export default function App() {
 
           {/* PROFILE TAB - Shows full profile with stats, avatar, progress, and logout */}
           {activeTab === 'stats' && (
-            <div className="animate-fade-in min-h-[460px] overflow-visible">
+            <div className="animate-fade-in h-[480px] overflow-y-auto custom-scrollbar">
               {/* Player Name */}
               <div className="text-center mb-4">
                 <h2 className="text-4xl md:text-5xl font-rpg font-black text-transparent bg-clip-text bg-gradient-to-b from-[#5c4033] to-[#2c1810] drop-shadow-sm mb-1">
@@ -459,7 +459,7 @@ export default function App() {
 
           {/* SHOP TAB - Full screen content */}
           {activeTab === 'shop' && (
-            <div className="w-full animate-fade-in space-y-4 min-h-[460px] overflow-y-auto">
+            <div className="w-full flex flex-col items-center justify-center animate-fade-in text-[#5c4033] h-[480px] overflow-y-auto custom-scrollbar">
               <ShoppingBag size={64} className="mb-4 opacity-50" />
               <p className="font-rpg text-lg">Loja em breve...</p>
               <p className="font-rpg text-sm opacity-70 mt-2">Itens e upgrades estarão disponíveis aqui</p>
@@ -468,7 +468,7 @@ export default function App() {
 
           {/* INTEGRATIONS TAB - Full screen content */}
           {activeTab === 'integrations' && (
-            <div className="w-full animate-fade-in space-y-4 min-h-[460px] overflow-y-auto">
+            <div className="w-full animate-fade-in space-y-4 h-[480px] overflow-y-auto custom-scrollbar">
               <h2 className="font-rpg text-xl text-[#5c4033] text-center mb-4">Integrações</h2>
               <StravaPanel
                 connected={!!profile?.strava_refresh_token}
@@ -493,7 +493,7 @@ export default function App() {
 
           {/* QR CODE TAB - Full screen content */}
           {activeTab === 'qr' && (
-            <div className="w-full flex flex-col items-center justify-center animate-fade-in min-h-[460px]">
+            <div className="w-full flex flex-col items-center justify-center animate-fade-in h-[480px] overflow-y-auto custom-scrollbar">
               <h2 className="font-rpg text-xl text-[#5c4033] mb-6">Seu QR Code</h2>
               <div className="bg-white p-6 rounded-lg border-4 border-[#8a1c1c] shadow-lg">
                 <QRCode
