@@ -382,7 +382,7 @@ export default function App() {
       {/* Logout Button */}
       <button
         onClick={signOut}
-        className="absolute top-8 right-6 z-50 text-yellow-600 hover:text-yellow-400 transition-colors bg-black/60 p-2 rounded-full border border-yellow-900/50 shadow-lg backdrop-blur-sm"
+        className="absolute top-10 right-6 z-50 text-yellow-600 hover:text-yellow-400 transition-colors bg-black/60 p-2 rounded-full border border-yellow-900/50 shadow-lg backdrop-blur-sm"
         title="Sair"
       >
         <LogOut size={20} />
@@ -404,7 +404,7 @@ export default function App() {
         </div>
 
         {/* Layer 2: The Content Container */}
-        <div className="relative z-20 flex flex-col pt-12 pb-24 px-4 sm:px-8">
+        <div className="relative z-20 flex flex-col pt-16 pb-24 px-4 sm:px-8">
 
           {/* Header Banner - Always visible */}
           <HeaderBanner title={`${title} - Rank ${rank}`} />
