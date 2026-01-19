@@ -406,112 +406,118 @@ export default function App() {
         {/* Layer 2: The Content Container */}
         <div className="relative z-20 flex flex-col pt-6 pb-16 px-4 sm:px-8">
 
-          {/* Header Banner */}
+          {/* Header Banner - Always visible */}
           <HeaderBanner title={`${title} - Rank ${rank}`} />
 
-          {/* Player Name */}
-          <div className="text-center mb-4">
-            <h2 className="text-4xl md:text-5xl font-rpg font-black text-transparent bg-clip-text bg-gradient-to-b from-[#5c4033] to-[#2c1810] drop-shadow-sm mb-1">
-              {profile?.display_name?.split(' ')[0] || user.email?.split('@')[0] || 'Aventureiro'}
-            </h2>
-            <p className="font-rpg font-bold text-[#8a1c1c] tracking-widest text-sm opacity-80">
-              ID: {user.id.slice(0, 8).toUpperCase()}
-            </p>
-          </div>
-
-          {/* Main Content Area */}
-          <div className="flex flex-col">
-
-            {/* Top Section: Stats + Avatar */}
-            <div className="flex items-center justify-between mb-3">
-              {/* Stats Column */}
-              <div className="flex flex-col gap-4 w-1/3 pt-2">
-                <StatBox label="NÍVEL ATUAL" value={currentLevel} delay={100} />
-                <StatBox label="TOTAL XP" value={Math.floor(totalXP)} delay={200} />
-                <StatBox label="FADIGA" value={`${todayStudyXP}/${STUDY_DAILY_CAP}`} delay={300} />
+          {/* PROFILE TAB - Shows full profile with stats, avatar, progress, and logout */}
+          {activeTab === 'stats' && (
+            <div className="animate-fade-in">
+              {/* Player Name */}
+              <div className="text-center mb-4">
+                <h2 className="text-4xl md:text-5xl font-rpg font-black text-transparent bg-clip-text bg-gradient-to-b from-[#5c4033] to-[#2c1810] drop-shadow-sm mb-1">
+                  {profile?.display_name?.split(' ')[0] || user.email?.split('@')[0] || 'Aventureiro'}
+                </h2>
+                <p className="font-rpg font-bold text-[#8a1c1c] tracking-widest text-sm opacity-80">
+                  ID: {user.id.slice(0, 8).toUpperCase()}
+                </p>
               </div>
 
-              {/* Avatar Column */}
-              <div className="w-2/3 pl-4 pt-2 relative">
-                <AvatarFrame
-                  avatarUrl={currentAvatarUrl}
-                  rank={rank}
-                  userId={user.id}
-                  onAvatarChange={setAvatarUrl}
+              {/* Stats + Avatar Section */}
+              <div className="flex items-center justify-between mb-3">
+                {/* Stats Column */}
+                <div className="flex flex-col gap-4 w-1/3 pt-2">
+                  <StatBox label="NÍVEL ATUAL" value={currentLevel} delay={100} />
+                  <StatBox label="TOTAL XP" value={Math.floor(totalXP)} delay={200} />
+                  <StatBox label="FADIGA" value={`${todayStudyXP}/${STUDY_DAILY_CAP}`} delay={300} />
+                </div>
+
+                {/* Avatar Column */}
+                <div className="w-2/3 pl-4 pt-2 relative">
+                  <AvatarFrame
+                    avatarUrl={currentAvatarUrl}
+                    rank={rank}
+                    userId={user.id}
+                    onAvatarChange={setAvatarUrl}
+                  />
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="text-center mb-4">
+                <p className="font-rpg text-[#5c4033] mb-2">Progresso do Nível</p>
+                <ProgressBar current={xpInLevel} max={xpRequired} />
+              </div>
+
+              {/* Log Message */}
+              <div className="bg-black/80 text-green-400 p-2 rounded font-mono text-xs border border-gray-700 text-center mb-4">
+                {logMsg}
+              </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={signOut}
+                className="w-full py-2 px-4 bg-[#8a1c1c]/20 hover:bg-[#8a1c1c]/40 text-[#8a1c1c] font-rpg text-sm rounded border border-[#8a1c1c]/30 transition-all flex items-center justify-center gap-2"
+              >
+                <LogOut size={16} />
+                Sair da Conta
+              </button>
+            </div>
+          )}
+
+          {/* SHOP TAB - Full screen content */}
+          {activeTab === 'shop' && (
+            <div className="flex-1 flex flex-col items-center justify-center animate-fade-in text-[#5c4033] min-h-[300px]">
+              <ShoppingBag size={64} className="mb-4 opacity-50" />
+              <p className="font-rpg text-lg">Loja em breve...</p>
+              <p className="font-rpg text-sm opacity-70 mt-2">Itens e upgrades estarão disponíveis aqui</p>
+            </div>
+          )}
+
+          {/* INTEGRATIONS TAB - Full screen content */}
+          {activeTab === 'integrations' && (
+            <div className="flex-1 animate-fade-in space-y-4">
+              <h2 className="font-rpg text-xl text-[#5c4033] text-center mb-4">Integrações</h2>
+              <StravaPanel
+                connected={!!profile?.strava_refresh_token}
+                syncMessage={syncMsg}
+                onConnect={handleStravaConnect}
+                onSync={handleStravaSync}
+                onDisconnect={handleStravaDisconnect}
+              />
+              <StudyTimer
+                todayStudyXP={todayStudyXP}
+                onComplete={handleStudyComplete}
+                onLog={setLogMsg}
+                isStudying={isStudying}
+                setIsStudying={setIsStudying}
+                timeLeft={timeLeft}
+                setTimeLeft={setTimeLeft}
+                sessionXP={sessionXP}
+                setSessionXP={setSessionXP}
+              />
+            </div>
+          )}
+
+          {/* QR CODE TAB - Full screen content */}
+          {activeTab === 'qr' && (
+            <div className="flex-1 flex flex-col items-center justify-center animate-fade-in min-h-[300px]">
+              <h2 className="font-rpg text-xl text-[#5c4033] mb-6">Seu QR Code</h2>
+              <div className="bg-white p-6 rounded-lg border-4 border-[#8a1c1c] shadow-lg">
+                <QRCode
+                  value={user.id.slice(0, 8).toUpperCase()}
+                  size={160}
+                  level="H"
                 />
               </div>
+              <p className="font-rpg text-sm mt-4 text-[#5c4033]">
+                ID: <span className="font-bold">{user.id.slice(0, 8).toUpperCase()}</span>
+              </p>
+              <p className="font-rpg text-xs mt-2 text-[#5c4033]/70">
+                Use este código para identificação
+              </p>
             </div>
+          )}
 
-            {/* Tab Content Display */}
-            <div className="bg-black/5 rounded-lg border border-[#8a1c1c]/20 p-3 sm:p-4 mb-2 backdrop-blur-sm">
-              {activeTab === 'stats' && (
-                <div className="animate-fade-in space-y-4">
-                  <div className="text-center">
-                    <p className="font-rpg text-[#5c4033] mb-2">Progresso do Nível</p>
-                    <ProgressBar current={xpInLevel} max={xpRequired} />
-                  </div>
-
-                  {/* Log Message */}
-                  <div className="bg-black/80 text-green-400 p-2 rounded font-mono text-xs border border-gray-700 text-center">
-                    {logMsg}
-                  </div>
-
-                  {/* Logout Button */}
-                  <button
-                    onClick={signOut}
-                    className="w-full mt-4 py-2 px-4 bg-[#8a1c1c]/20 hover:bg-[#8a1c1c]/40 text-[#8a1c1c] font-rpg text-sm rounded border border-[#8a1c1c]/30 transition-all flex items-center justify-center gap-2"
-                  >
-                    <LogOut size={16} />
-                    Sair da Conta
-                  </button>
-                </div>
-              )}
-
-              {activeTab === 'shop' && (
-                <div className="h-full flex flex-col items-center justify-center animate-fade-in text-[#5c4033]">
-                  <ShoppingBag size={48} className="mb-3 opacity-50" />
-                  <p className="font-rpg text-sm">Loja em breve...</p>
-                </div>
-              )}
-
-              {activeTab === 'integrations' && (
-                <div className="h-full animate-fade-in space-y-4 overflow-auto">
-                  <StravaPanel
-                    connected={!!profile?.strava_refresh_token}
-                    syncMessage={syncMsg}
-                    onConnect={handleStravaConnect}
-                    onSync={handleStravaSync}
-                    onDisconnect={handleStravaDisconnect}
-                  />
-                  <StudyTimer
-                    todayStudyXP={todayStudyXP}
-                    onComplete={handleStudyComplete}
-                    onLog={setLogMsg}
-                    isStudying={isStudying}
-                    setIsStudying={setIsStudying}
-                    timeLeft={timeLeft}
-                    setTimeLeft={setTimeLeft}
-                    sessionXP={sessionXP}
-                    setSessionXP={setSessionXP}
-                  />
-                </div>
-              )}
-
-              {activeTab === 'qr' && (
-                <div className="h-full flex flex-col items-center justify-center animate-fade-in">
-                  <div className="bg-white p-4 rounded border-2 border-[#8a1c1c]">
-                    <QRCode
-                      value={user.id.slice(0, 8).toUpperCase()}
-                      size={128}
-                      level="H"
-                    />
-                  </div>
-                  <p className="font-rpg text-xs mt-3 text-[#5c4033]">ID: {user.id.slice(0, 8).toUpperCase()}</p>
-                </div>
-              )}
-            </div>
-
-          </div>
         </div>
 
         {/* Footer Navigation */}
