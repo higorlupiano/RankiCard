@@ -63,12 +63,9 @@ export default function App() {
     CapacitorApp.addListener('appUrlOpen', async ({ url }) => {
       console.log('Deep link received:', url);
 
-      // Check if this is our OAuth callback
-      if (url.startsWith('com.rankicard.app://auth/callback')) {
+      // Check if this is our OAuth callback (any URL with our scheme)
+      if (url.startsWith('com.rankicard.app://')) {
         // The URL contains the auth tokens in the fragment (after #)
-        // Supabase handles this automatically via onAuthStateChange
-        // We just need to ensure the app processes the URL
-
         // Extract the fragment (everything after #)
         const hashIndex = url.indexOf('#');
         if (hashIndex !== -1) {
@@ -79,6 +76,7 @@ export default function App() {
           const refreshToken = params.get('refresh_token');
 
           if (accessToken && refreshToken) {
+            console.log('Setting session from deep link');
             // Let Supabase handle the session
             const { supabase } = await import('./src/lib/supabase');
             await supabase.auth.setSession({
@@ -99,7 +97,7 @@ export default function App() {
       if (result?.url) {
         console.log('App launched with URL:', result.url);
 
-        if (result.url.startsWith('com.rankicard.app://auth/callback')) {
+        if (result.url.startsWith('com.rankicard.app://')) {
           const hashIndex = result.url.indexOf('#');
           if (hashIndex !== -1) {
             const fragment = result.url.substring(hashIndex + 1);
@@ -108,6 +106,7 @@ export default function App() {
             const refreshToken = params.get('refresh_token');
 
             if (accessToken && refreshToken) {
+              console.log('Setting session from launch URL');
               const { supabase } = await import('./src/lib/supabase');
               await supabase.auth.setSession({
                 access_token: accessToken,
