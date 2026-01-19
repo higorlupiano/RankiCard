@@ -10,7 +10,7 @@ interface FooterNavProps {
 
 export const FooterNav: React.FC<FooterNavProps> = ({ activeTab, onTabChange }) => {
     return (
-        <div className="absolute bottom-6 md:bottom-8 left-0 right-0 z-30 px-8 flex justify-between items-end">
+        <div className="absolute bottom-3 md:bottom-4 left-0 right-0 z-30 px-6 py-2 flex justify-between items-end bg-[#1a0a00]/90 backdrop-blur-sm mx-2 rounded-lg border border-[#c8a95c]/30">
             <SpriteIcon
                 icon={<ShoppingBag size={24} />}
                 label="Loja"

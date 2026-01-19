@@ -404,7 +404,7 @@ export default function App() {
         </div>
 
         {/* Layer 2: The Content Container */}
-        <div className="relative z-20 flex flex-col pt-6 pb-16 px-4 sm:px-8">
+        <div className="relative z-20 flex flex-col pt-6 pb-24 px-4 sm:px-8">
 
           {/* Header Banner - Always visible */}
           <HeaderBanner title={`${title} - Rank ${rank}`} />
