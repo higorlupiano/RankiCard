@@ -382,7 +382,7 @@ export default function App() {
       {/* Logout Button */}
       <button
         onClick={signOut}
-        className="absolute top-4 right-4 z-50 text-yellow-600/50 hover:text-yellow-400 transition-colors"
+        className="absolute top-8 right-6 z-50 text-yellow-600 hover:text-yellow-400 transition-colors bg-black/60 p-2 rounded-full border border-yellow-900/50 shadow-lg backdrop-blur-sm"
         title="Sair"
       >
         <LogOut size={20} />
@@ -404,14 +404,14 @@ export default function App() {
         </div>
 
         {/* Layer 2: The Content Container */}
-        <div className="relative z-20 flex flex-col pt-6 pb-24 px-4 sm:px-8">
+        <div className="relative z-20 flex flex-col pt-12 pb-24 px-4 sm:px-8">
 
           {/* Header Banner - Always visible */}
           <HeaderBanner title={`${title} - Rank ${rank}`} />
 
           {/* PROFILE TAB - Shows full profile with stats, avatar, progress, and logout */}
           {activeTab === 'stats' && (
-            <div className="animate-fade-in min-h-[420px] overflow-y-auto">
+            <div className="animate-fade-in min-h-[460px] overflow-visible">
               {/* Player Name */}
               <div className="text-center mb-4">
                 <h2 className="text-4xl md:text-5xl font-rpg font-black text-transparent bg-clip-text bg-gradient-to-b from-[#5c4033] to-[#2c1810] drop-shadow-sm mb-1">
@@ -453,20 +453,13 @@ export default function App() {
                 {logMsg}
               </div>
 
-              {/* Logout Button */}
-              <button
-                onClick={signOut}
-                className="w-full py-2 px-4 bg-[#8a1c1c]/20 hover:bg-[#8a1c1c]/40 text-[#8a1c1c] font-rpg text-sm rounded border border-[#8a1c1c]/30 transition-all flex items-center justify-center gap-2"
-              >
-                <LogOut size={16} />
-                Sair da Conta
-              </button>
+              {/* Logout Button removed as requested */}
             </div>
           )}
 
           {/* SHOP TAB - Full screen content */}
           {activeTab === 'shop' && (
-            <div className="w-full flex flex-col items-center justify-center animate-fade-in text-[#5c4033] min-h-[420px]">
+            <div className="w-full flex flex-col items-center justify-center animate-fade-in text-[#5c4033] min-h-[460px]">
               <ShoppingBag size={64} className="mb-4 opacity-50" />
               <p className="font-rpg text-lg">Loja em breve...</p>
               <p className="font-rpg text-sm opacity-70 mt-2">Itens e upgrades estarão disponíveis aqui</p>
@@ -475,7 +468,7 @@ export default function App() {
 
           {/* INTEGRATIONS TAB - Full screen content */}
           {activeTab === 'integrations' && (
-            <div className="w-full animate-fade-in space-y-4 min-h-[420px] overflow-y-auto">
+            <div className="w-full animate-fade-in space-y-4 min-h-[460px] overflow-y-auto">
               <h2 className="font-rpg text-xl text-[#5c4033] text-center mb-4">Integrações</h2>
               <StravaPanel
                 connected={!!profile?.strava_refresh_token}
@@ -500,7 +493,7 @@ export default function App() {
 
           {/* QR CODE TAB - Full screen content */}
           {activeTab === 'qr' && (
-            <div className="w-full flex flex-col items-center justify-center animate-fade-in min-h-[420px]">
+            <div className="w-full flex flex-col items-center justify-center animate-fade-in min-h-[460px]">
               <h2 className="font-rpg text-xl text-[#5c4033] mb-6">Seu QR Code</h2>
               <div className="bg-white p-6 rounded-lg border-4 border-[#8a1c1c] shadow-lg">
                 <QRCode
