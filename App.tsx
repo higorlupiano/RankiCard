@@ -368,7 +368,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-black flex items-center justify-center p-4 overflow-auto relative">
+    <div className="min-h-[100dvh] bg-black flex items-start justify-center p-2 sm:p-4 overflow-auto relative">
       {/* Global Background */}
       <div className="absolute inset-0 z-0 opacity-40">
         <img
@@ -389,10 +389,10 @@ export default function App() {
       </button>
 
       {/* --- THE CARD --- */}
-      <div className="relative w-full max-w-[420px] min-h-[600px] h-auto shadow-2xl z-10 overflow-visible">
+      <div className="relative w-full max-w-[420px] shadow-2xl z-10 my-2">
 
         {/* Layer 1: The Parchment Background */}
-        <div className="absolute inset-2 md:inset-3 bg-[#e6d5ac] overflow-visible rounded-sm">
+        <div className="absolute inset-1 sm:inset-2 bg-[#e6d5ac] rounded-sm -z-10">
           <div
             className="absolute inset-0 opacity-60 mix-blend-multiply"
             style={{
@@ -404,13 +404,13 @@ export default function App() {
         </div>
 
         {/* Layer 2: The Content Container */}
-        <div className="relative z-20 flex flex-col pt-8 pb-20 px-6 md:px-10 min-h-full">
+        <div className="relative z-20 flex flex-col pt-6 pb-16 px-4 sm:px-8">
 
           {/* Header Banner */}
           <HeaderBanner title={`${title} - Rank ${rank}`} />
 
           {/* Player Name */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-4">
             <h2 className="text-4xl md:text-5xl font-rpg font-black text-transparent bg-clip-text bg-gradient-to-b from-[#5c4033] to-[#2c1810] drop-shadow-sm mb-1">
               {profile?.display_name?.split(' ')[0] || user.email?.split('@')[0] || 'Aventureiro'}
             </h2>
@@ -420,19 +420,19 @@ export default function App() {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 relative flex flex-col">
+          <div className="flex flex-col">
 
             {/* Top Section: Stats + Avatar */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               {/* Stats Column */}
-              <div className="flex flex-col gap-6 w-1/3 pt-4">
+              <div className="flex flex-col gap-4 w-1/3 pt-2">
                 <StatBox label="NÍVEL ATUAL" value={currentLevel} delay={100} />
                 <StatBox label="TOTAL XP" value={Math.floor(totalXP)} delay={200} />
                 <StatBox label="FADIGA" value={`${todayStudyXP}/${STUDY_DAILY_CAP}`} delay={300} />
               </div>
 
               {/* Avatar Column */}
-              <div className="w-2/3 pl-4 pt-6 relative">
+              <div className="w-2/3 pl-4 pt-2 relative">
                 <AvatarFrame
                   avatarUrl={currentAvatarUrl}
                   rank={rank}
@@ -443,7 +443,7 @@ export default function App() {
             </div>
 
             {/* Tab Content Display */}
-            <div className="flex-1 bg-black/5 rounded-lg border border-[#8a1c1c]/20 p-4 mb-4 backdrop-blur-sm min-h-[150px] overflow-auto">
+            <div className="bg-black/5 rounded-lg border border-[#8a1c1c]/20 p-3 sm:p-4 mb-2 backdrop-blur-sm">
               {activeTab === 'stats' && (
                 <div className="animate-fade-in space-y-4">
                   <div className="text-center">
