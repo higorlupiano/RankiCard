@@ -466,7 +466,7 @@ export default function App() {
 
           {/* SHOP TAB - Full screen content */}
           {activeTab === 'shop' && (
-            <div className="flex-1 flex flex-col items-center justify-center animate-fade-in text-[#5c4033] min-h-[420px]">
+            <div className="w-full flex flex-col items-center justify-center animate-fade-in text-[#5c4033] min-h-[420px]">
               <ShoppingBag size={64} className="mb-4 opacity-50" />
               <p className="font-rpg text-lg">Loja em breve...</p>
               <p className="font-rpg text-sm opacity-70 mt-2">Itens e upgrades estarão disponíveis aqui</p>
@@ -475,7 +475,7 @@ export default function App() {
 
           {/* INTEGRATIONS TAB - Full screen content */}
           {activeTab === 'integrations' && (
-            <div className="flex-1 animate-fade-in space-y-4 min-h-[420px] overflow-y-auto">
+            <div className="w-full animate-fade-in space-y-4 min-h-[420px] overflow-y-auto">
               <h2 className="font-rpg text-xl text-[#5c4033] text-center mb-4">Integrações</h2>
               <StravaPanel
                 connected={!!profile?.strava_refresh_token}
@@ -500,7 +500,7 @@ export default function App() {
 
           {/* QR CODE TAB - Full screen content */}
           {activeTab === 'qr' && (
-            <div className="flex-1 flex flex-col items-center justify-center animate-fade-in min-h-[420px]">
+            <div className="w-full flex flex-col items-center justify-center animate-fade-in min-h-[420px]">
               <h2 className="font-rpg text-xl text-[#5c4033] mb-6">Seu QR Code</h2>
               <div className="bg-white p-6 rounded-lg border-4 border-[#8a1c1c] shadow-lg">
                 <QRCode
