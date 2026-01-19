@@ -459,7 +459,7 @@ export default function App() {
 
           {/* SHOP TAB - Full screen content */}
           {activeTab === 'shop' && (
-            <div className="w-full flex flex-col items-center justify-center animate-fade-in text-[#5c4033] min-h-[460px]">
+            <div className="w-full animate-fade-in space-y-4 min-h-[460px] overflow-y-auto">
               <ShoppingBag size={64} className="mb-4 opacity-50" />
               <p className="font-rpg text-lg">Loja em breve...</p>
               <p className="font-rpg text-sm opacity-70 mt-2">Itens e upgrades estarão disponíveis aqui</p>
