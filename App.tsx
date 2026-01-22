@@ -19,7 +19,7 @@ import { StatBox, ProgressBar } from './src/components/ui';
 import { HeaderBanner, FooterNav } from './src/components/layout';
 import { AvatarFrame } from './src/components/player';
 import { LoginScreen } from './src/components/auth';
-import { StudyTimer, StravaPanel } from './src/components/game';
+import { StudyTimer, StravaPanel, SpotifyPanel } from './src/components/game';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -30,6 +30,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('stats');
   const [logMsg, setLogMsg] = useState('Bem-vindo, Aventureiro!');
   const [syncMsg, setSyncMsg] = useState('');
+  const [spotifySyncMsg, setSpotifySyncMsg] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   // Timer state (elevated to persist across tab changes)
@@ -148,17 +149,23 @@ export default function App() {
     };
   }, []);
 
-  // Handle Strava OAuth callback
+  // Handle Strava/Spotify OAuth callback
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+    const state = urlParams.get('state');
 
     if (code && user) {
       // Clear URL params
       window.history.replaceState({}, document.title, window.location.pathname);
 
-      // Exchange code for tokens
-      handleStravaCallback(code);
+      // Determine which service the callback is for
+      if (state === 'spotify') {
+        handleSpotifyCallback(code);
+      } else {
+        // Default to Strava for backwards compatibility
+        handleStravaCallback(code);
+      }
     }
   }, [user]);
 
@@ -359,6 +366,168 @@ export default function App() {
     setLogMsg('Strava desvinculado.');
   };
 
+  // Spotify handlers
+  const handleSpotifyConnect = () => {
+    const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+    const redirectUri = window.location.origin;
+    const scope = 'user-read-recently-played';
+
+    if (!clientId) {
+      setLogMsg('⚠️ Configure VITE_SPOTIFY_CLIENT_ID no .env.local');
+      return;
+    }
+
+    const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=spotify`;
+    window.location.href = authUrl;
+  };
+
+  const handleSpotifyCallback = async (code: string) => {
+    setLogMsg('🔄 Vinculando Spotify...');
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/spotify-auth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': window.location.origin,
+        },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await res.json();
+
+      if (data.refresh_token) {
+        await updateProfile({
+          spotify_refresh_token: data.refresh_token,
+          spotify_access_token: data.access_token,
+          spotify_expires_at: data.expires_at,
+        });
+        refreshProfile();
+        setLogMsg('✅ Spotify conectado com sucesso!');
+      } else {
+        setLogMsg('❌ Erro ao vincular Spotify');
+        console.error('Spotify error:', data);
+      }
+    } catch (error) {
+      console.error('Spotify callback error:', error);
+      setLogMsg('❌ Erro de conexão com Spotify');
+    }
+  };
+
+  const handleSpotifySync = async () => {
+    if (!profile || !user) return;
+
+    setSpotifySyncMsg('⏳ Buscando músicas recentes...');
+
+    try {
+      // Check if token needs refresh
+      let accessToken = profile.spotify_access_token;
+      const expiresAt = profile.spotify_expires_at || 0;
+      const now = Math.floor(Date.now() / 1000);
+
+      if (now >= expiresAt && profile.spotify_refresh_token) {
+        // Refresh token
+        const tokenRes = await fetch(`${SUPABASE_URL}/functions/v1/spotify-auth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: profile.spotify_refresh_token }),
+        });
+        const tokenData = await tokenRes.json();
+
+        if (tokenData.access_token) {
+          accessToken = tokenData.access_token;
+          await updateProfile({
+            spotify_access_token: tokenData.access_token,
+            spotify_refresh_token: tokenData.refresh_token || profile.spotify_refresh_token,
+            spotify_expires_at: tokenData.expires_at,
+          });
+        } else {
+          setSpotifySyncMsg('❌ Erro ao renovar token');
+          return;
+        }
+      }
+
+      if (!accessToken) {
+        setSpotifySyncMsg('❌ Token não disponível');
+        return;
+      }
+
+      // Fetch recently played tracks
+      const lastSync = profile.spotify_last_sync || 0;
+      const afterTimestamp = lastSync > 0 ? lastSync : undefined;
+
+      let url = 'https://api.spotify.com/v1/me/player/recently-played?limit=50';
+      if (afterTimestamp) {
+        url += `&after=${afterTimestamp}`;
+      }
+
+      const tracksRes = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+
+      if (!tracksRes.ok) {
+        setSpotifySyncMsg('❌ Erro ao buscar músicas');
+        return;
+      }
+
+      const tracksData = await tracksRes.json();
+      const items = tracksData.items || [];
+
+      if (items.length === 0) {
+        setSpotifySyncMsg('✅ Nenhuma música nova');
+        return;
+      }
+
+      // Calculate XP - 1 XP per minute of music
+      let totalDurationMs = 0;
+      let latestTimestamp = lastSync;
+
+      items.forEach((item: any) => {
+        const track = item.track;
+        const playedAt = new Date(item.played_at).getTime();
+
+        // Only count tracks played after last sync
+        if (playedAt > lastSync) {
+          totalDurationMs += track.duration_ms;
+        }
+
+        if (playedAt > latestTimestamp) {
+          latestTimestamp = playedAt;
+        }
+      });
+
+      const totalMinutes = Math.floor(totalDurationMs / 60000);
+      const xpGained = totalMinutes; // 1 XP per minute
+
+      // Update last sync timestamp
+      await updateProfile({ spotify_last_sync: latestTimestamp });
+
+      if (xpGained > 0) {
+        await addXP(xpGained);
+        setSpotifySyncMsg(`🎵 +${xpGained} XP (${totalMinutes} min de música)`);
+        setLogMsg(`+${xpGained} XP do Spotify!`);
+      } else {
+        setSpotifySyncMsg('✅ Sem XP elegível nas músicas');
+      }
+
+      refreshProfile();
+
+    } catch (error) {
+      console.error('Spotify sync error:', error);
+      setSpotifySyncMsg('❌ Erro na sincronização');
+    }
+  };
+
+  const handleSpotifyDisconnect = async () => {
+    if (!confirm('Desvincular Spotify?')) return;
+    await updateProfile({
+      spotify_refresh_token: null,
+      spotify_access_token: null,
+      spotify_expires_at: null,
+    });
+    setSpotifySyncMsg('');
+    setLogMsg('Spotify desvinculado.');
+  };
+
   // Study handler
   const handleStudyComplete = async (xp: number) => {
     const success = await addStudyXP(xp);
@@ -476,6 +645,13 @@ export default function App() {
                 onConnect={handleStravaConnect}
                 onSync={handleStravaSync}
                 onDisconnect={handleStravaDisconnect}
+              />
+              <SpotifyPanel
+                connected={!!profile?.spotify_refresh_token}
+                syncMessage={spotifySyncMsg}
+                onConnect={handleSpotifyConnect}
+                onSync={handleSpotifySync}
+                onDisconnect={handleSpotifyDisconnect}
               />
               <StudyTimer
                 todayStudyXP={todayStudyXP}
