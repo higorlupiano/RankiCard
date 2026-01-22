@@ -537,7 +537,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-black flex items-start justify-center p-2 sm:p-4 overflow-auto relative">
+    <div className="min-h-[100dvh] bg-black flex items-start justify-center p-2 sm:p-4 overflow-auto relative landscape-container">
       {/* Global Background */}
       <div className="absolute inset-0 z-0 opacity-40">
         <img
@@ -558,7 +558,7 @@ export default function App() {
       </button>
 
       {/* --- THE CARD --- */}
-      <div className="relative w-full max-w-[420px] shadow-2xl z-10 my-2">
+      <div className="relative w-full max-w-[420px] shadow-2xl z-10 my-2 landscape-card">
 
         {/* Layer 1: The Parchment Background */}
         <div className="absolute inset-1 sm:inset-2 bg-[#e6d5ac] rounded-sm -z-10">
@@ -573,14 +573,14 @@ export default function App() {
         </div>
 
         {/* Layer 2: The Content Container */}
-        <div className="relative z-20 flex flex-col pt-16 pb-24 px-4 sm:px-8">
+        <div className="relative z-20 flex flex-col pt-16 pb-24 px-4 sm:px-8 landscape-header">
 
           {/* Header Banner - Always visible */}
           <HeaderBanner title={`${title} - Rank ${rank}`} />
 
           {/* PROFILE TAB - Shows full profile with stats, avatar, progress, and logout */}
           {activeTab === 'stats' && (
-            <div className="animate-fade-in h-[480px] overflow-y-auto custom-scrollbar">
+            <div className="animate-fade-in h-[480px] overflow-y-auto custom-scrollbar landscape-content">
               {/* Player Name */}
               <div className="text-center mb-4">
                 <h2 className="text-4xl md:text-5xl font-rpg font-black text-transparent bg-clip-text bg-gradient-to-b from-[#5c4033] to-[#2c1810] drop-shadow-sm mb-1">
@@ -628,7 +628,7 @@ export default function App() {
 
           {/* SHOP TAB - Full screen content */}
           {activeTab === 'shop' && (
-            <div className="w-full flex flex-col items-center justify-center animate-fade-in text-[#5c4033] h-[480px] overflow-y-auto custom-scrollbar">
+            <div className="w-full flex flex-col items-center justify-center animate-fade-in text-[#5c4033] h-[480px] overflow-y-auto custom-scrollbar landscape-content">
               <ShoppingBag size={64} className="mb-4 opacity-50" />
               <p className="font-rpg text-lg">Loja em breve...</p>
               <p className="font-rpg text-sm opacity-70 mt-2">Itens e upgrades estarão disponíveis aqui</p>
@@ -637,7 +637,7 @@ export default function App() {
 
           {/* INTEGRATIONS TAB - Full screen content */}
           {activeTab === 'integrations' && (
-            <div className="w-full animate-fade-in space-y-4 h-[480px] overflow-y-auto custom-scrollbar">
+            <div className="w-full animate-fade-in space-y-4 h-[480px] overflow-y-auto custom-scrollbar landscape-content landscape-integrations">
               <h2 className="font-rpg text-xl text-[#5c4033] text-center mb-4">Integrações</h2>
               <StravaPanel
                 connected={!!profile?.strava_refresh_token}
@@ -669,7 +669,7 @@ export default function App() {
 
           {/* QR CODE TAB - Full screen content */}
           {activeTab === 'qr' && (
-            <div className="w-full flex flex-col items-center justify-center animate-fade-in h-[480px] overflow-y-auto custom-scrollbar">
+            <div className="w-full flex flex-col items-center justify-center animate-fade-in h-[480px] overflow-y-auto custom-scrollbar landscape-content">
               <h2 className="font-rpg text-xl text-[#5c4033] mb-6">Seu QR Code</h2>
               <div className="bg-white p-6 rounded-lg border-4 border-[#8a1c1c] shadow-lg">
                 <QRCode
