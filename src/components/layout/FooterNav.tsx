@@ -11,8 +11,8 @@ interface FooterNavProps {
 
 export const FooterNav: React.FC<FooterNavProps> = ({ activeTab, onTabChange, isAdmin = false }) => {
     return (
-        <div className="absolute bottom-1 md:bottom-2 left-0 right-0 z-30 mx-2 rounded-lg border border-[#c8a95c]/30 bg-[#1a0a00]/90 backdrop-blur-sm overflow-hidden">
-            <div className="flex items-end px-4 py-1 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div className="absolute bottom-1 md:bottom-2 left-0 right-0 z-30 mx-2 rounded-lg border border-[#c8a95c]/30 bg-[#1a0a00]/90 backdrop-blur-sm overflow-visible">
+            <div className="flex items-end px-4 pt-3 pb-1 overflow-x-auto overflow-y-hidden scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 <div className="flex justify-between items-end min-w-full gap-2">
                     <SpriteIcon
                         icon={<ShoppingBag size={20} />}
