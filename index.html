@@ -74,18 +74,19 @@
 
     /* Landscape Mode Support */
     @media screen and (orientation: landscape) and (max-height: 500px) {
+
       /* Main container adjustments */
       .landscape-container {
         padding: 0.25rem !important;
       }
-      
+
       /* Card dimensions swap - in landscape, card becomes wider and shorter */
       .landscape-card {
         max-width: none !important;
         width: 100% !important;
         max-height: calc(100dvh - 1rem) !important;
       }
-      
+
       /* Content area - reduce height in landscape */
       .landscape-content {
         height: auto !important;
@@ -93,35 +94,35 @@
         padding-top: 0.5rem !important;
         padding-bottom: 0.5rem !important;
       }
-      
+
       /* Header adjustments */
       .landscape-header {
         padding-top: 0.5rem !important;
       }
-      
+
       /* Footer nav at bottom */
       .landscape-footer {
         padding: 0.5rem !important;
       }
-      
+
       /* Stats section side-by-side in landscape */
       .landscape-stats {
         flex-direction: row !important;
         gap: 1rem !important;
       }
-      
+
       /* Stat boxes smaller in landscape */
       .landscape-stat-box {
         padding: 0.25rem !important;
         min-width: auto !important;
       }
-      
+
       /* Avatar smaller in landscape */
       .landscape-avatar {
         width: 100px !important;
         height: 100px !important;
       }
-      
+
       /* Profile section horizontal layout */
       .landscape-profile {
         display: grid !important;
@@ -129,12 +130,12 @@
         gap: 1rem !important;
         align-items: start !important;
       }
-      
+
       /* Text sizing */
       .landscape-title {
         font-size: 1.5rem !important;
       }
-      
+
       /* Integration panels in a row */
       .landscape-integrations {
         display: grid !important;
@@ -151,6 +152,11 @@
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background: rgba(139, 108, 66, 0.5);
       border-radius: 2px;
+    }
+
+    /* Hide scrollbar for nav */
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
     }
   </style>
 </head>
