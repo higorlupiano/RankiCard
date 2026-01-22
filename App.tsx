@@ -38,6 +38,10 @@ export default function App() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [sessionXP, setSessionXP] = useState(0);
 
+  // Strava sync cooldown state (15 minutes = 900 seconds)
+  const STRAVA_COOLDOWN_SECONDS = 15 * 60;
+  const [stravaCooldownRemaining, setStravaCooldownRemaining] = useState(0);
+
   // Handle OAuth redirect from web to native app (when accessed via mobile browser)
   useEffect(() => {
     // Skip if running in native app
@@ -76,6 +80,31 @@ export default function App() {
 
     return () => clearInterval(interval);
   }, [isStudying, timeLeft, sessionXP, addStudyXP]);
+
+  // Strava cooldown timer effect - load from localStorage and countdown
+  useEffect(() => {
+    // Load cooldown from localStorage on mount
+    const savedCooldownEnd = localStorage.getItem('stravaSyncCooldownEnd');
+    if (savedCooldownEnd) {
+      const endTime = parseInt(savedCooldownEnd, 10);
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+      setStravaCooldownRemaining(remaining);
+    }
+
+    // Set up interval to countdown
+    const interval = setInterval(() => {
+      setStravaCooldownRemaining((prev) => {
+        if (prev <= 1) {
+          localStorage.removeItem('stravaSyncCooldownEnd');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Handle deep link for OAuth callback (Android)
   useEffect(() => {
@@ -347,6 +376,11 @@ export default function App() {
       }
 
       refreshProfile();
+
+      // Activate cooldown after successful sync
+      const cooldownEnd = Date.now() + STRAVA_COOLDOWN_SECONDS * 1000;
+      localStorage.setItem('stravaSyncCooldownEnd', cooldownEnd.toString());
+      setStravaCooldownRemaining(STRAVA_COOLDOWN_SECONDS);
 
     } catch (error) {
       console.error('Sync error:', error);
@@ -669,6 +703,8 @@ export default function App() {
                 onConnect={handleStravaConnect}
                 onSync={handleStravaSync}
                 onDisconnect={handleStravaDisconnect}
+                isSyncDisabled={stravaCooldownRemaining > 0}
+                cooldownRemaining={stravaCooldownRemaining}
               />
               <SpotifyPanel
                 connected={!!profile?.spotify_refresh_token}

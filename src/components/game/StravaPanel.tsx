@@ -6,6 +6,8 @@ interface StravaPanelProps {
     onConnect: () => void;
     onSync: () => void;
     onDisconnect: () => void;
+    isSyncDisabled?: boolean;
+    cooldownRemaining?: number; // seconds remaining
 }
 
 export const StravaPanel: React.FC<StravaPanelProps> = ({
@@ -14,7 +16,15 @@ export const StravaPanel: React.FC<StravaPanelProps> = ({
     onConnect,
     onSync,
     onDisconnect,
+    isSyncDisabled = false,
+    cooldownRemaining = 0,
 }) => {
+    // Format remaining time as MM:SS
+    const formatCooldown = (seconds: number): string => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
     return (
         <div className="bg-gradient-to-b from-[#e6d5ac] to-[#d4c196] rounded-lg p-4 border-2 border-[#FC4C02] shadow-lg">
             {/* Header */}
@@ -46,9 +56,15 @@ export const StravaPanel: React.FC<StravaPanelProps> = ({
 
                     <button
                         onClick={onSync}
-                        className="w-full bg-[#2c241b] hover:bg-[#4a3b2a] text-white py-3 rounded-lg font-rpg font-bold transition-all flex items-center justify-center gap-2 mb-2"
+                        disabled={isSyncDisabled}
+                        className={`w-full py-3 rounded-lg font-rpg font-bold transition-all flex items-center justify-center gap-2 mb-2 ${isSyncDisabled
+                                ? 'bg-gray-400 cursor-not-allowed text-gray-200'
+                                : 'bg-[#2c241b] hover:bg-[#4a3b2a] text-white'
+                            }`}
                     >
-                        🔄 Sincronizar Atividades
+                        {isSyncDisabled
+                            ? `⏳ Aguarde ${formatCooldown(cooldownRemaining)}`
+                            : '🔄 Sincronizar Atividades'}
                     </button>
 
                     {syncMessage && (
