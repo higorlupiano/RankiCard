@@ -121,6 +121,12 @@ export function getXpToNextLevel(currentLevel: number): number {
 export function getRankMultiplier(missionRank: Rank, userRank: Rank): number {
     const missionIndex = RANKS.indexOf(missionRank);
     const userIndex = RANKS.indexOf(userRank);
+
+    // If ranks are invalid, return default multiplier
+    if (missionIndex === -1 || userIndex === -1) {
+        return 1.00;
+    }
+
     const diff = missionIndex - userIndex;
 
     if (diff <= -2) return 0.50;
