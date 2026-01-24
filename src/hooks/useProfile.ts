@@ -63,39 +63,42 @@ export function useProfile(user: User | null) {
     }, [user]);
 
     const addXP = useCallback(async (amount: number) => {
-        if (!profile) return;
+        if (!user) return;
 
-        const newTotalXP = profile.total_xp + amount;
-        let newLevel = profile.current_level;
+        const { data, error } = await supabase.rpc('add_xp', { amount });
 
-        // Calculate new level
-        const getXpForNextLevel = (level: number) => 50 * (level * level);
-        while (newTotalXP >= getXpForNextLevel(newLevel)) {
-            newLevel++;
+        if (error) {
+            console.error('Error adding XP:', error);
+            return;
         }
 
-        await updateProfile({
-            total_xp: newTotalXP,
-            current_level: newLevel,
-        });
-
-        return { newTotalXP, newLevel, leveledUp: newLevel > profile.current_level };
-    }, [profile, updateProfile]);
+        if (data && profile) {
+            setProfile({
+                ...profile,
+                total_xp: data.newTotalXP,
+                current_level: data.newLevel
+            });
+            return data;
+        }
+    }, [user, profile]);
 
     const addStudyXP = useCallback(async (amount: number) => {
-        if (!profile) return false;
+        if (!user) return false;
 
-        const STUDY_DAILY_CAP = 1500;
-        if (profile.today_study_xp + amount > STUDY_DAILY_CAP) {
-            return false; // Cap reached
+        const { data, error } = await supabase.rpc('add_study_xp', { amount });
+
+        if (error) {
+            console.error('Error adding study XP:', error);
+            return false;
         }
 
-        await updateProfile({
-            today_study_xp: profile.today_study_xp + amount,
-        });
-        await addXP(amount);
-        return true;
-    }, [profile, updateProfile, addXP]);
+        if (data === true) {
+            // Refresh to sync local state with server state (daily cap, last date, etc)
+            loadProfile(user.id);
+            return true;
+        }
+        return false;
+    }, [user]);
 
     return {
         profile,
