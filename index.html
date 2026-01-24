@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>RankiCard - RPG Life</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -78,6 +78,8 @@
       /* Main container adjustments */
       .landscape-container {
         padding: 0.25rem !important;
+        padding-left: max(0.25rem, env(safe-area-inset-left)) !important;
+        padding-right: max(0.25rem, env(safe-area-inset-right)) !important;
       }
 
       /* Card dimensions swap - in landscape, card becomes wider and shorter */
@@ -141,6 +143,15 @@
         display: grid !important;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
         gap: 0.5rem !important;
+      }
+
+      /* Hide scrollbar in landscape to prevent black bar issue */
+      .landscape-content::-webkit-scrollbar {
+        display: none !important;
+      }
+      .landscape-content {
+        -ms-overflow-style: none !important;
+        scrollbar-width: none !important;
       }
     }
 

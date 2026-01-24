@@ -696,35 +696,38 @@ export default function App() {
 
           {/* INTEGRATIONS TAB - Full screen content */}
           {activeTab === 'integrations' && (
-            <div className="w-full animate-fade-in space-y-4 h-[480px] overflow-y-auto custom-scrollbar landscape-content landscape-integrations">
-              <h2 className="font-rpg text-xl text-[#5c4033] text-center mb-4">Integrações</h2>
-              <StravaPanel
-                connected={!!profile?.strava_refresh_token}
-                syncMessage={syncMsg}
-                onConnect={handleStravaConnect}
-                onSync={handleStravaSync}
-                onDisconnect={handleStravaDisconnect}
-                isSyncDisabled={stravaCooldownRemaining > 0}
-                cooldownRemaining={stravaCooldownRemaining}
-              />
-              <SpotifyPanel
-                connected={!!profile?.spotify_refresh_token}
-                syncMessage={spotifySyncMsg}
-                onConnect={handleSpotifyConnect}
-                onSync={handleSpotifySync}
-                onDisconnect={handleSpotifyDisconnect}
-              />
-              <StudyTimer
-                todayStudyXP={todayStudyXP}
-                onComplete={handleStudyComplete}
-                onLog={setLogMsg}
-                isStudying={isStudying}
-                setIsStudying={setIsStudying}
-                timeLeft={timeLeft}
-                setTimeLeft={setTimeLeft}
-                sessionXP={sessionXP}
-                setSessionXP={setSessionXP}
-              />
+            <div className="w-full animate-fade-in h-[480px] overflow-y-auto custom-scrollbar landscape-content">
+              <h2 className="font-rpg text-xl text-[#5c4033] text-center mb-4 lg:mb-2">Integrações</h2>
+              
+              <div className="space-y-4 landscape-integrations">
+                <StravaPanel
+                  connected={!!profile?.strava_refresh_token}
+                  syncMessage={syncMsg}
+                  onConnect={handleStravaConnect}
+                  onSync={handleStravaSync}
+                  onDisconnect={handleStravaDisconnect}
+                  isSyncDisabled={stravaCooldownRemaining > 0}
+                  cooldownRemaining={stravaCooldownRemaining}
+                />
+                <SpotifyPanel
+                  connected={!!profile?.spotify_refresh_token}
+                  syncMessage={spotifySyncMsg}
+                  onConnect={handleSpotifyConnect}
+                  onSync={handleSpotifySync}
+                  onDisconnect={handleSpotifyDisconnect}
+                />
+                <StudyTimer
+                  todayStudyXP={todayStudyXP}
+                  onComplete={handleStudyComplete}
+                  onLog={setLogMsg}
+                  isStudying={isStudying}
+                  setIsStudying={setIsStudying}
+                  timeLeft={timeLeft}
+                  setTimeLeft={setTimeLeft}
+                  sessionXP={sessionXP}
+                  setSessionXP={setSessionXP}
+                />
+              </div>
             </div>
           )}
 
