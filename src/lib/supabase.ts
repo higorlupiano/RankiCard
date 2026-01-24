@@ -18,10 +18,15 @@ export interface Profile {
     current_level: number;
     today_study_xp: number;
     last_date: string;
+    // Strava integration
     strava_refresh_token: string | null;
     strava_access_token: string | null;
     strava_expires_at: number | null;
     strava_last_sync: number;
+    // Game economy
+    gold: number;
+    // Admin
+    is_admin: boolean;
     created_at: string;
     updated_at: string;
 }

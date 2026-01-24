@@ -6,6 +6,7 @@ interface SpotifyPanelProps {
     onConnect: () => void;
     onSync: () => void;
     onDisconnect: () => void;
+    isSyncDisabled?: boolean;
 }
 
 export const SpotifyPanel: React.FC<SpotifyPanelProps> = ({
@@ -14,6 +15,7 @@ export const SpotifyPanel: React.FC<SpotifyPanelProps> = ({
     onConnect,
     onSync,
     onDisconnect,
+    isSyncDisabled = false,
 }) => {
     return (
         <div className="bg-gradient-to-b from-[#e6d5ac] to-[#d4c196] rounded-lg p-4 border-2 border-[#1DB954] shadow-lg">
@@ -46,7 +48,8 @@ export const SpotifyPanel: React.FC<SpotifyPanelProps> = ({
 
                     <button
                         onClick={onSync}
-                        className="w-full bg-[#2c241b] hover:bg-[#4a3b2a] text-white py-3 rounded-lg font-rpg font-bold transition-all flex items-center justify-center gap-2 mb-2"
+                        disabled={isSyncDisabled}
+                        className="w-full bg-[#2c241b] hover:bg-[#4a3b2a] disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-lg font-rpg font-bold transition-all flex items-center justify-center gap-2 mb-2"
                     >
                         🔄 Sincronizar Músicas
                     </button>

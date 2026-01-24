@@ -42,6 +42,10 @@ export default function App() {
   const STRAVA_COOLDOWN_SECONDS = 15 * 60;
   const [stravaCooldownRemaining, setStravaCooldownRemaining] = useState(0);
 
+  // Race condition protection
+  const [isStravaSyncing, setIsStravaSyncing] = useState(false);
+  const [isSpotifySyncing, setIsSpotifySyncing] = useState(false);
+
   // Handle OAuth redirect from web to native app (when accessed via mobile browser)
   useEffect(() => {
     // Skip if running in native app
@@ -207,9 +211,23 @@ export default function App() {
         body: JSON.stringify({ code }),
       });
 
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Edge Function error:', res.status, errorText);
+        setLogMsg('❌ Erro na autenticação do Strava');
+        return;
+      }
+
       const data = await res.json();
 
-      if (data.refresh_token) {
+      // Validate response data
+      if (!data || typeof data !== 'object') {
+        console.error('Invalid response format:', data);
+        setLogMsg('❌ Resposta inválida do servidor');
+        return;
+      }
+
+      if (data.refresh_token && data.access_token && data.expires_at) {
         await updateProfile({
           strava_refresh_token: data.refresh_token,
           strava_access_token: data.access_token,
@@ -218,7 +236,7 @@ export default function App() {
         refreshProfile();
         setLogMsg('✅ Strava conectado com sucesso!');
       } else {
-        setLogMsg('❌ Erro ao vincular Strava');
+        setLogMsg('❌ Erro ao vincular Strava: dados incompletos');
         console.error('Strava error:', data);
       }
     } catch (error) {
@@ -268,7 +286,14 @@ export default function App() {
 
   const handleStravaSync = async () => {
     if (!profile || !user) return;
+    
+    // Prevent multiple simultaneous syncs
+    if (isStravaSyncing) {
+      setSyncMsg('⏳ Sincronização já em andamento...');
+      return;
+    }
 
+    setIsStravaSyncing(true);
     setSyncMsg('⏳ Buscando atividades...');
 
     try {
@@ -284,19 +309,29 @@ export default function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refresh_token: profile.strava_refresh_token }),
         });
-        const tokenData = await tokenRes.json();
 
-        if (tokenData.access_token) {
-          accessToken = tokenData.access_token;
-          await updateProfile({
-            strava_access_token: tokenData.access_token,
-            strava_refresh_token: tokenData.refresh_token,
-            strava_expires_at: tokenData.expires_at,
-          });
-        } else {
+        if (!tokenRes.ok) {
+          const errorText = await tokenRes.text();
+          console.error('Token refresh error:', tokenRes.status, errorText);
           setSyncMsg('❌ Erro ao renovar token');
           return;
         }
+
+        const tokenData = await tokenRes.json();
+
+        // Validate token response
+        if (!tokenData || !tokenData.access_token) {
+          console.error('Invalid token response:', tokenData);
+          setSyncMsg('❌ Erro ao renovar token: resposta inválida');
+          return;
+        }
+
+        accessToken = tokenData.access_token;
+        await updateProfile({
+          strava_access_token: tokenData.access_token,
+          strava_refresh_token: tokenData.refresh_token || profile.strava_refresh_token,
+          strava_expires_at: tokenData.expires_at,
+        });
       }
 
       if (!accessToken) {
@@ -317,13 +352,22 @@ export default function App() {
       setStravaCooldownRemaining(STRAVA_COOLDOWN_SECONDS);
 
       if (!activitiesRes.ok) {
+        const errorText = await activitiesRes.text();
+        console.error('Strava API error:', activitiesRes.status, errorText);
         setSyncMsg('❌ Erro ao buscar atividades');
         return;
       }
 
       const activities = await activitiesRes.json();
 
-      if (!Array.isArray(activities) || activities.length === 0) {
+      // Validate response format
+      if (!Array.isArray(activities)) {
+        console.error('Invalid activities format:', activities);
+        setSyncMsg('❌ Formato de resposta inválido');
+        return;
+      }
+
+      if (activities.length === 0) {
         setSyncMsg('✅ Nenhuma atividade nova');
         return;
       }
@@ -385,6 +429,9 @@ export default function App() {
     } catch (error) {
       console.error('Sync error:', error);
       setSyncMsg('❌ Erro na sincronização');
+      setLogMsg('❌ Erro ao sincronizar atividades do Strava');
+    } finally {
+      setIsStravaSyncing(false);
     }
   };
 
@@ -427,9 +474,23 @@ export default function App() {
         body: JSON.stringify({ code }),
       });
 
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Edge Function error:', res.status, errorText);
+        setLogMsg('❌ Erro na autenticação do Spotify');
+        return;
+      }
+
       const data = await res.json();
 
-      if (data.refresh_token) {
+      // Validate response data
+      if (!data || typeof data !== 'object') {
+        console.error('Invalid response format:', data);
+        setLogMsg('❌ Resposta inválida do servidor');
+        return;
+      }
+
+      if (data.refresh_token && data.access_token && data.expires_at) {
         await updateProfile({
           spotify_refresh_token: data.refresh_token,
           spotify_access_token: data.access_token,
@@ -438,7 +499,7 @@ export default function App() {
         refreshProfile();
         setLogMsg('✅ Spotify conectado com sucesso!');
       } else {
-        setLogMsg('❌ Erro ao vincular Spotify');
+        setLogMsg('❌ Erro ao vincular Spotify: dados incompletos');
         console.error('Spotify error:', data);
       }
     } catch (error) {
@@ -450,6 +511,13 @@ export default function App() {
   const handleSpotifySync = async () => {
     if (!profile || !user) return;
 
+    // Prevent multiple simultaneous syncs
+    if (isSpotifySyncing) {
+      setSpotifySyncMsg('⏳ Sincronização já em andamento...');
+      return;
+    }
+
+    setIsSpotifySyncing(true);
     setSpotifySyncMsg('⏳ Buscando músicas recentes...');
 
     try {
@@ -465,19 +533,29 @@ export default function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refresh_token: profile.spotify_refresh_token }),
         });
-        const tokenData = await tokenRes.json();
 
-        if (tokenData.access_token) {
-          accessToken = tokenData.access_token;
-          await updateProfile({
-            spotify_access_token: tokenData.access_token,
-            spotify_refresh_token: tokenData.refresh_token || profile.spotify_refresh_token,
-            spotify_expires_at: tokenData.expires_at,
-          });
-        } else {
+        if (!tokenRes.ok) {
+          const errorText = await tokenRes.text();
+          console.error('Token refresh error:', tokenRes.status, errorText);
           setSpotifySyncMsg('❌ Erro ao renovar token');
           return;
         }
+
+        const tokenData = await tokenRes.json();
+
+        // Validate token response
+        if (!tokenData || !tokenData.access_token) {
+          console.error('Invalid token response:', tokenData);
+          setSpotifySyncMsg('❌ Erro ao renovar token: resposta inválida');
+          return;
+        }
+
+        accessToken = tokenData.access_token;
+        await updateProfile({
+          spotify_access_token: tokenData.access_token,
+          spotify_refresh_token: tokenData.refresh_token || profile.spotify_refresh_token,
+          spotify_expires_at: tokenData.expires_at,
+        });
       }
 
       if (!accessToken) {
@@ -499,12 +577,22 @@ export default function App() {
       });
 
       if (!tracksRes.ok) {
+        const errorText = await tracksRes.text();
+        console.error('Spotify API error:', tracksRes.status, errorText);
         setSpotifySyncMsg('❌ Erro ao buscar músicas');
         return;
       }
 
       const tracksData = await tracksRes.json();
-      const items = tracksData.items || [];
+
+      // Validate response format
+      if (!tracksData || typeof tracksData !== 'object') {
+        console.error('Invalid tracks format:', tracksData);
+        setSpotifySyncMsg('❌ Formato de resposta inválido');
+        return;
+      }
+
+      const items = Array.isArray(tracksData.items) ? tracksData.items : [];
 
       if (items.length === 0) {
         setSpotifySyncMsg('✅ Nenhuma música nova');
@@ -548,6 +636,9 @@ export default function App() {
     } catch (error) {
       console.error('Spotify sync error:', error);
       setSpotifySyncMsg('❌ Erro na sincronização');
+      setLogMsg('❌ Erro ao sincronizar músicas do Spotify');
+    } finally {
+      setIsSpotifySyncing(false);
     }
   };
 
@@ -706,7 +797,7 @@ export default function App() {
                   onConnect={handleStravaConnect}
                   onSync={handleStravaSync}
                   onDisconnect={handleStravaDisconnect}
-                  isSyncDisabled={stravaCooldownRemaining > 0}
+                  isSyncDisabled={stravaCooldownRemaining > 0 || isStravaSyncing}
                   cooldownRemaining={stravaCooldownRemaining}
                 />
                 <SpotifyPanel
@@ -715,6 +806,7 @@ export default function App() {
                   onConnect={handleSpotifyConnect}
                   onSync={handleSpotifySync}
                   onDisconnect={handleSpotifyDisconnect}
+                  isSyncDisabled={isSpotifySyncing}
                 />
                 <StudyTimer
                   todayStudyXP={todayStudyXP}
