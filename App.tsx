@@ -17,6 +17,8 @@ import { InventoryView } from './src/components/views/InventoryView';
 import { LeaderboardView } from './src/components/views/LeaderboardView';
 import { ActivityHistoryView } from './src/components/views/ActivityHistoryView';
 import { LevelUpAnimation } from './src/components/ui/LevelUpAnimation';
+import { OnboardingModal } from './src/components/ui/OnboardingModal';
+import { useLocalNotifications } from './src/hooks/useLocalNotifications';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('stats');
@@ -28,12 +30,16 @@ export default function App() {
 import { getTitle, getRank } from './src/utils/gameLogic';
 
 function AppContent({ activeTab, setActiveTab }: { activeTab: Tab, setActiveTab: (t: Tab) => void }) {
-  const { user, profile, authLoading, profileLoading, signInWithGoogle, signOut } = useGame();
+  const { user, profile, authLoading, profileLoading, signInWithGoogle, signOut, updateProfile } = useGame();
+  const { requestPermission, scheduleStreakReminder } = useLocalNotifications();
 
   // Level up animation state
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [newLevel, setNewLevel] = useState(1);
   const [previousLevel, setPreviousLevel] = useState<number | null>(null);
+
+  // Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Detect level up
   useEffect(() => {
@@ -45,6 +51,33 @@ function AppContent({ activeTab, setActiveTab }: { activeTab: Tab, setActiveTab:
       setPreviousLevel(profile.current_level);
     }
   }, [profile?.current_level, previousLevel]);
+
+  // Check if user needs onboarding
+  useEffect(() => {
+    if (profile && !profile.onboarding_completed) {
+      setShowOnboarding(true);
+    }
+  }, [profile]);
+
+  // Setup notifications after login
+  useEffect(() => {
+    if (user && profile) {
+      // Request permission and schedule streak reminder
+      requestPermission().then(granted => {
+        if (granted) {
+          scheduleStreakReminder();
+        }
+      });
+    }
+  }, [user?.id]);
+
+  const handleOnboardingComplete = async () => {
+    setShowOnboarding(false);
+    // Mark onboarding as completed in profile
+    if (profile) {
+      await updateProfile({ onboarding_completed: true });
+    }
+  };
 
   // Loading state
   if (authLoading || profileLoading) {
@@ -68,6 +101,11 @@ function AppContent({ activeTab, setActiveTab }: { activeTab: Tab, setActiveTab:
 
   return (
     <div className="min-h-[100dvh] bg-black flex items-start justify-center p-2 sm:p-4 overflow-auto relative landscape-container">
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <OnboardingModal onComplete={handleOnboardingComplete} />
+      )}
+
       {/* Level Up Animation */}
       {showLevelUp && (
         <LevelUpAnimation

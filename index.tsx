@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ErrorBoundary } from './src/components/ui';
 import { GameProvider } from './src/contexts/GameContext';
+import { QueryProvider } from './src/providers/QueryProvider';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -13,9 +14,11 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
-      <GameProvider>
-        <App />
-      </GameProvider>
+      <QueryProvider>
+        <GameProvider>
+          <App />
+        </GameProvider>
+      </QueryProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );

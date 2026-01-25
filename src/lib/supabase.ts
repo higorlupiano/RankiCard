@@ -30,6 +30,8 @@ export interface Profile {
     gold: number;
     // Admin
     is_admin: boolean;
+    // Onboarding
+    onboarding_completed: boolean;
     created_at: string;
     updated_at: string;
 }
