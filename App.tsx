@@ -13,6 +13,7 @@ import { IntegrationsView } from './src/components/views/IntegrationsView';
 import { QrCodeView } from './src/components/views/QrCodeView';
 import { AdminView } from './src/components/views/AdminView';
 import { AchievementsView } from './src/components/views/AchievementsView';
+import { InventoryView } from './src/components/views/InventoryView';
 
 export default function App() {
   const { user, profile, authLoading, profileLoading, signInWithGoogle, signOut, getTitle, getRank } = useGame();
@@ -99,6 +100,7 @@ function AppContent({ activeTab, setActiveTab }: { activeTab: Tab, setActiveTab:
           {/* Views */}
           {activeTab === 'stats' && <StatsView />}
           {activeTab === 'shop' && <ShopView />}
+          {activeTab === 'inventory' && <InventoryView />}
           {activeTab === 'missions' && <MissionsView />}
           {activeTab === 'integrations' && <IntegrationsView />}
           {activeTab === 'qr' && <QrCodeView />}
