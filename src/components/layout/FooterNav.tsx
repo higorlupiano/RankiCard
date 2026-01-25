@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Scroll, Sword, QrCode, Target, Shield, Trophy, Package, Crown, History } from 'lucide-react';
+import { ShoppingBag, Scroll, Sword, QrCode, Target, Shield, Trophy, Package, Crown, History, Users } from 'lucide-react';
 import { SpriteIcon } from '../ui/SpriteIcon';
 import { Tab } from '../../types';
 
@@ -39,11 +39,18 @@ export const FooterNav: React.FC<FooterNavProps> = ({ activeTab, onTabChange, is
                         onClick={() => onTabChange('achievements')}
                     />
                     <SpriteIcon
+                        icon={<Users size={20} />}
+                        label="Guildas"
+                        isActive={activeTab === 'guilds'}
+                        onClick={() => onTabChange('guilds')}
+                    />
+                    <SpriteIcon
                         icon={<ShoppingBag size={20} />}
                         label="Loja"
                         isActive={activeTab === 'shop'}
                         onClick={() => onTabChange('shop')}
                     />
+
                     <SpriteIcon
                         icon={<Package size={20} />}
                         label="Inventário"

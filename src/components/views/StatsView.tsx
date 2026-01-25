@@ -1,13 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useGame } from '../../contexts/GameContext';
 import { getXpProgress, getRank, getTitle, STUDY_DAILY_CAP, getStreakBonus, getStreakLabel } from '../../utils/gameLogic';
 import { StatBox, ProgressBar } from '../ui';
 import { AvatarFrame } from '../player';
 import { Flame, Coins } from 'lucide-react';
+import { XPChart } from '../ui/XPChart';
+import { useActivityLog } from '../../hooks/useActivityLog';
 
 export const StatsView = () => {
     const { user, profile, logMsg } = useGame();
+    const { activities } = useActivityLog(user);
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+    // Prepare XP chart data
+    const chartData = useMemo(() => {
+        if (!activities.length) return [];
+
+        // Group XP by date (last 7 days)
+        const xpByDate: Record<string, number> = {};
+        const today = new Date();
+
+        // Initialize last 7 days with 0
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            xpByDate[dateStr] = 0;
+        }
+
+        // Add XP from activities
+        activities.forEach(act => {
+            if (act.xp_change && act.xp_change > 0) {
+                const date = new Date(act.created_at);
+                const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                if (xpByDate.hasOwnProperty(dateStr)) {
+                    xpByDate[dateStr] += act.xp_change;
+                }
+            }
+        });
+
+        return Object.entries(xpByDate).map(([date, xp]) => ({ date, xp }));
+    }, [activities]);
 
     if (!user) return null;
 
@@ -87,6 +120,13 @@ export const StatsView = () => {
                 <ProgressBar current={xpInLevel} max={xpRequired} />
             </div>
 
+            {/* XP Chart */}
+            {chartData.length > 0 && (
+                <div className="mb-4">
+                    <XPChart data={chartData} height={100} />
+                </div>
+            )}
+
             {/* Log Message */}
             <div className="bg-black/80 text-green-400 p-2 rounded font-mono text-xs border border-gray-700 text-center mb-4">
                 {logMsg}
@@ -94,4 +134,3 @@ export const StatsView = () => {
         </div>
     );
 };
-
