@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 
 interface AuthState {
     user: User | null;
@@ -40,20 +42,45 @@ export function useAuth() {
     }, []);
 
     const signInWithGoogle = useCallback(async () => {
-        // Always redirect to web URL
-        // The web app will detect mobile browser and redirect to native app
-        const redirectUrl = 'https://rankicard.vercel.app';
+        // Use native deep link for mobile platforms, web URL for browser
+        const isNative = Capacitor.isNativePlatform();
+        const redirectUrl = isNative
+            ? 'com.rankicard.app://'
+            : 'https://rankicard.vercel.app';
 
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: redirectUrl,
-            },
-        });
+        if (isNative) {
+            // On native platforms, use Capacitor Browser to open OAuth flow
+            // This allows the system to intercept the deep link redirect
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: redirectUrl,
+                    skipBrowserRedirect: true, // Don't auto-redirect, we'll handle it
+                },
+            });
 
-        if (error) {
-            console.error('Error signing in:', error);
-            throw error;
+            if (error) {
+                console.error('Error signing in:', error);
+                throw error;
+            }
+
+            if (data?.url) {
+                // Open the OAuth URL in the system browser
+                await Browser.open({ url: data.url });
+            }
+        } else {
+            // On web, use standard OAuth flow
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: redirectUrl,
+                },
+            });
+
+            if (error) {
+                console.error('Error signing in:', error);
+                throw error;
+            }
         }
     }, []);
 
