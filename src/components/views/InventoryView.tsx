@@ -64,10 +64,10 @@ export const InventoryView = () => {
 
     if (loading) {
         return (
-            <div className="w-full flex items-center justify-center h-[480px] text-yellow-100">
-                <Loader2 className="animate-spin mr-2" />
-                <span>Carregando inventário...</span>
-            </div>
+            <ViewContainer centered>
+                <Loader2 className="animate-spin mr-2 text-yellow-100" />
+                <span className="text-yellow-100">Carregando inventário...</span>
+            </ViewContainer>
         );
     }
 
