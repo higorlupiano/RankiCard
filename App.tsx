@@ -126,14 +126,7 @@ function AppContent({ activeTab, setActiveTab }: { activeTab: Tab, setActiveTab:
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
       </div>
 
-      {/* Logout Button */}
-      <button
-        onClick={signOut}
-        className="absolute top-10 right-6 z-50 text-yellow-600 hover:text-yellow-400 transition-colors bg-black/60 p-2 rounded-full border border-yellow-900/50 shadow-lg backdrop-blur-sm"
-        title="Sair"
-      >
-        <LogOut size={20} />
-      </button>
+
 
       {/* --- THE CARD --- */}
       <div className="relative w-full max-w-[420px] shadow-2xl z-10 my-2 landscape-card">
@@ -151,7 +144,16 @@ function AppContent({ activeTab, setActiveTab }: { activeTab: Tab, setActiveTab:
         </div>
 
         {/* Layer 2: The Content Container */}
-        <div className="relative z-20 flex flex-col pt-16 pb-24 px-4 sm:px-8 landscape-header">
+        <div className="relative z-20 flex flex-col pt-2 pb-24 px-4 sm:px-8 landscape-header">
+
+          {/* Logout Button */}
+          <button
+            onClick={signOut}
+            className="absolute top-1 right-1 z-50 text-yellow-600 hover:text-yellow-400 transition-colors bg-black/60 p-1.5 rounded-full border border-yellow-900/50 shadow-lg backdrop-blur-sm"
+            title="Sair"
+          >
+            <LogOut size={16} />
+          </button>
 
           {/* Header Banner */}
           <HeaderBanner title={`${title} - Rank ${rank}`} />
