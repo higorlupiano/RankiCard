@@ -1,1 +1,1 @@
-export type Tab = 'stats' | 'shop' | 'missions' | 'integrations' | 'qr' | 'achievements' | 'inventory' | 'admin';
+export type Tab = 'stats' | 'shop' | 'missions' | 'integrations' | 'qr' | 'achievements' | 'inventory' | 'leaderboard' | 'history' | 'admin';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LogOut } from 'lucide-react';
 import { Tab } from './src/types';
 import { useGame } from './src/contexts/GameContext';
@@ -14,16 +14,11 @@ import { QrCodeView } from './src/components/views/QrCodeView';
 import { AdminView } from './src/components/views/AdminView';
 import { AchievementsView } from './src/components/views/AchievementsView';
 import { InventoryView } from './src/components/views/InventoryView';
+import { LeaderboardView } from './src/components/views/LeaderboardView';
+import { ActivityHistoryView } from './src/components/views/ActivityHistoryView';
+import { LevelUpAnimation } from './src/components/ui/LevelUpAnimation';
 
 export default function App() {
-  const { user, profile, authLoading, profileLoading, signInWithGoogle, signOut, getTitle, getRank } = useGame();
-  // Wait, getTitle/getRank are utils, not in context. Use utils directly or context?
-  // Context didn't export getTitle/getRank. It exported profile.
-  // I need to import getTitle/getRank from utils here if needed, or inside views.
-
-  // App.tsx HeaderBanner needs title and rank.
-  // So I import utils here.
-
   const [activeTab, setActiveTab] = useState<Tab>('stats');
 
   return <AppContent activeTab={activeTab} setActiveTab={setActiveTab} />;
@@ -34,6 +29,22 @@ import { getTitle, getRank } from './src/utils/gameLogic';
 
 function AppContent({ activeTab, setActiveTab }: { activeTab: Tab, setActiveTab: (t: Tab) => void }) {
   const { user, profile, authLoading, profileLoading, signInWithGoogle, signOut } = useGame();
+
+  // Level up animation state
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [newLevel, setNewLevel] = useState(1);
+  const [previousLevel, setPreviousLevel] = useState<number | null>(null);
+
+  // Detect level up
+  useEffect(() => {
+    if (profile && previousLevel !== null && profile.current_level > previousLevel) {
+      setNewLevel(profile.current_level);
+      setShowLevelUp(true);
+    }
+    if (profile) {
+      setPreviousLevel(profile.current_level);
+    }
+  }, [profile?.current_level, previousLevel]);
 
   // Loading state
   if (authLoading || profileLoading) {
@@ -57,6 +68,14 @@ function AppContent({ activeTab, setActiveTab }: { activeTab: Tab, setActiveTab:
 
   return (
     <div className="min-h-[100dvh] bg-black flex items-start justify-center p-2 sm:p-4 overflow-auto relative landscape-container">
+      {/* Level Up Animation */}
+      {showLevelUp && (
+        <LevelUpAnimation
+          newLevel={newLevel}
+          onComplete={() => setShowLevelUp(false)}
+        />
+      )}
+
       {/* Global Background */}
       <div className="absolute inset-0 z-0 opacity-40">
         <img
@@ -105,6 +124,8 @@ function AppContent({ activeTab, setActiveTab }: { activeTab: Tab, setActiveTab:
           {activeTab === 'integrations' && <IntegrationsView />}
           {activeTab === 'qr' && <QrCodeView />}
           {activeTab === 'achievements' && <AchievementsView />}
+          {activeTab === 'leaderboard' && <LeaderboardView />}
+          {activeTab === 'history' && <ActivityHistoryView />}
           {activeTab === 'admin' && <AdminView />}
 
         </div>
