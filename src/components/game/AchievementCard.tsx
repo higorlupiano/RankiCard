@@ -17,13 +17,13 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
             relative p-3 rounded-lg border-2 transition-all
             ${unlocked
                 ? 'bg-gradient-to-br from-yellow-900/40 to-amber-900/30 border-yellow-600/50'
-                : 'bg-black/30 border-gray-700/30 opacity-60'
+                : 'bg-black/20 border-gray-600/40'
             }
         `}>
             {/* Icon */}
             <div className={`
                 text-3xl mb-2 
-                ${unlocked ? '' : 'grayscale opacity-50'}
+                ${unlocked ? '' : 'grayscale-[40%] opacity-80'}
             `}>
                 {achievement.icon}
             </div>
@@ -31,7 +31,7 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
             {/* Name */}
             <h4 className={`
                 font-rpg text-sm font-bold mb-1
-                ${unlocked ? 'text-yellow-100' : 'text-gray-400'}
+                ${unlocked ? 'text-yellow-100' : 'text-gray-200'}
             `}>
                 {achievement.name}
             </h4>
@@ -39,7 +39,7 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
             {/* Description */}
             <p className={`
                 text-xs mb-2
-                ${unlocked ? 'text-yellow-200/70' : 'text-gray-500'}
+                ${unlocked ? 'text-yellow-200/70' : 'text-gray-400'}
             `}>
                 {achievement.description}
             </p>

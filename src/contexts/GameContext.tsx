@@ -349,7 +349,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
             await updateProfile({ strava_last_sync: latestDate });
 
             if (totalXpGained > 0) {
-                await addXP(totalXpGained);
+                await addXP(totalXpGained, 'strava_sync', `Sincronização Strava (${newActivitiesCount} atividades)`);
                 setSyncMsg(`🔥 +${totalXpGained} XP (${newActivitiesCount} atividades)`);
                 setLogMsg(`+${totalXpGained} XP do Strava!`);
             } else if (manualIgnored > 0) {

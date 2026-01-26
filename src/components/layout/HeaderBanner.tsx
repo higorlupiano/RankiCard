@@ -8,9 +8,10 @@ interface HeaderBannerProps {
 export const HeaderBanner: React.FC<HeaderBannerProps> = ({ title }) => {
     return (
         <div className="relative mx-auto w-full max-w-[300px] h-16 mb-2 flex items-center justify-center">
-            {/* The Red Banner Shape (CSS) */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#590e0e] to-[#2c0404] shadow-lg"
+            {/* The Banner Shape - now uses theme colors */}
+            <div className="absolute inset-0 shadow-lg"
                 style={{
+                    background: 'linear-gradient(to bottom, var(--theme-primary), color-mix(in srgb, var(--theme-primary) 50%, black))',
                     clipPath: "polygon(0 0, 100% 0, 95% 50%, 100% 100%, 0 100%, 5% 50%)"
                 }}
             />

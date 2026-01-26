@@ -131,8 +131,8 @@ function AppContent({ activeTab, setActiveTab }: { activeTab: Tab, setActiveTab:
       {/* --- THE CARD --- */}
       <div className="relative w-full max-w-[420px] shadow-2xl z-10 my-2 landscape-card">
 
-        {/* Layer 1: The Parchment Background */}
-        <div className="absolute inset-1 sm:inset-2 bg-[#e6d5ac] rounded-sm -z-10">
+        {/* Layer 1: The Parchment Background - now uses theme colors */}
+        <div className="absolute inset-1 sm:inset-2 rounded-sm -z-10" style={{ background: 'var(--theme-gradient)' }}>
           <div
             className="absolute inset-0 opacity-60 mix-blend-multiply"
             style={{

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect } from 'react';
 import { Theme, DEFAULT_THEME, useThemes } from '../hooks/useThemes';
 import { useGame } from './GameContext';
 
@@ -23,6 +23,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         activateTheme,
         loading,
     } = useThemes(user);
+
+    // Apply theme CSS variables globally when theme changes
+    useEffect(() => {
+        const root = document.documentElement;
+        root.style.setProperty('--theme-primary', activeTheme.primary_color);
+        root.style.setProperty('--theme-secondary', activeTheme.secondary_color);
+        root.style.setProperty('--theme-accent', activeTheme.accent_color);
+        root.style.setProperty('--theme-text', activeTheme.text_color);
+        root.style.setProperty('--theme-gradient', activeTheme.background_gradient);
+
+        // Also set data attribute for CSS selectors if needed
+        root.setAttribute('data-theme', activeTheme.code);
+    }, [activeTheme]);
 
     return (
         <ThemeContext.Provider value={{

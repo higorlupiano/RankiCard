@@ -100,7 +100,7 @@ export function useProfile(user: User | null) {
         setProfile((prev) => prev ? { ...prev, ...updates } : null);
     }, [user]);
 
-    const addXP = useCallback(async (amount: number) => {
+    const addXP = useCallback(async (amount: number, source: string = 'xp_gain', description?: string) => {
         if (!user) return;
 
         const { data, error } = await supabase.rpc('add_xp', { amount });
@@ -111,6 +111,28 @@ export function useProfile(user: User | null) {
         }
 
         if (data && profile) {
+            // Log the activity
+            await supabase.from('activity_log').insert({
+                user_id: user.id,
+                action_type: source,
+                description: description || `+${amount} XP ganho`,
+                xp_amount: amount,
+                gold_amount: 0,
+                metadata: { newLevel: data.newLevel, leveledUp: data.leveledUp }
+            });
+
+            // If leveled up, log that too
+            if (data.leveledUp) {
+                await supabase.from('activity_log').insert({
+                    user_id: user.id,
+                    action_type: 'level_up',
+                    description: `Subiu para o nível ${data.newLevel}!`,
+                    xp_amount: 0,
+                    gold_amount: 0,
+                    metadata: { newLevel: data.newLevel }
+                });
+            }
+
             setProfile({
                 ...profile,
                 total_xp: data.newTotalXP,
@@ -131,6 +153,16 @@ export function useProfile(user: User | null) {
         }
 
         if (data === true) {
+            // Log the study activity
+            await supabase.from('activity_log').insert({
+                user_id: user.id,
+                action_type: 'study',
+                description: `Sessão de estudo completada (+${amount} XP)`,
+                xp_amount: amount,
+                gold_amount: 0,
+                metadata: {}
+            });
+
             // Refresh to sync local state with server state (daily cap, last date, etc)
             loadProfile(user.id);
             return true;

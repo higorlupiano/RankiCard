@@ -11,6 +11,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lato:wght@400;700&display=swap"
     rel="stylesheet">
   <style>
+    /* Theme CSS Variables - defaults to Medieval theme */
+    :root {
+      --theme-primary: #5c4033;
+      --theme-secondary: #e6d5ac;
+      --theme-accent: #8b6c42;
+      --theme-text: #FFFFFF;
+      --theme-gradient: linear-gradient(to bottom, #e6d5ac, #d4c196);
+    }
+
     body {
       font-family: 'Lato', sans-serif;
       background-color: #050505;
@@ -19,6 +28,23 @@
 
     .font-rpg {
       font-family: 'Cinzel', serif;
+    }
+
+    /* Theme-aware classes */
+    .theme-bg {
+      background: var(--theme-gradient);
+    }
+
+    .theme-border {
+      border-color: var(--theme-primary);
+    }
+
+    .theme-text-primary {
+      color: var(--theme-primary);
+    }
+
+    .theme-text-accent {
+      color: var(--theme-accent);
     }
 
     /* Custom scrollbar for RPG feel */
