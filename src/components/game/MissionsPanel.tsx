@@ -171,25 +171,42 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({
     if (loading) {
         return (
             <div className="flex items-center justify-center py-8">
-                <RefreshCw className="animate-spin text-[#5c4033]" size={24} />
+                <RefreshCw className="animate-spin" style={{ color: 'var(--theme-primary)' }} size={24} />
             </div>
         );
     }
 
     return (
-        <div className="bg-gradient-to-b from-[#e6d5ac] to-[#d4c196] rounded-lg p-4 border-2 border-[#8b6c42] shadow-lg">
+        <div
+            className="rounded-lg p-4 border-2 shadow-lg"
+            style={{
+                background: 'var(--theme-gradient)',
+                borderColor: 'var(--theme-accent)'
+            }}
+        >
             {/* Header */}
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#8b6c42]/30">
+            <div
+                className="flex items-center justify-between mb-4 pb-2"
+                style={{ borderBottom: '1px solid var(--theme-accent)' }}
+            >
                 <div className="flex items-center gap-2">
-                    <Target size={20} className="text-[#8a1c1c]" />
-                    <h3 className="font-rpg font-bold text-[#3e2723] text-lg">Missões Diárias</h3>
+                    <Target size={20} style={{ color: 'var(--theme-primary)' }} />
+                    <h3
+                        className="font-rpg font-bold text-lg"
+                        style={{ color: 'var(--theme-primary)' }}
+                    >
+                        Missões Diárias
+                    </h3>
                     {isWeekend() && (
                         <span className="flex items-center gap-1 bg-orange-500 text-white px-2 py-0.5 rounded-full text-[9px] font-rpg font-bold">
                             <Flame size={10} /> +50% FDS
                         </span>
                     )}
                 </div>
-                <span className="text-xs font-rpg text-[#5c4033]/70">
+                <span
+                    className="text-xs font-rpg"
+                    style={{ color: 'var(--theme-primary)', opacity: 0.7 }}
+                >
                     {missions.filter(m => m.userStatus === 'completed').length}/{missions.length}
                 </span>
             </div>
@@ -210,14 +227,23 @@ export const MissionsPanel: React.FC<MissionsPanelProps> = ({
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-6 text-[#5c4033]/70 font-rpg">
+                <div
+                    className="text-center py-6 font-rpg"
+                    style={{ color: 'var(--theme-primary)', opacity: 0.7 }}
+                >
                     Nenhuma missão disponível
                 </div>
             )}
 
             {/* Footer info */}
-            <div className="mt-4 pt-2 border-t border-[#8b6c42]/20 text-center">
-                <p className="text-[10px] text-[#5c4033]/60 font-rpg">
+            <div
+                className="mt-4 pt-2 text-center"
+                style={{ borderTop: '1px solid var(--theme-accent)', opacity: 0.5 }}
+            >
+                <p
+                    className="text-[10px] font-rpg"
+                    style={{ color: 'var(--theme-primary)' }}
+                >
                     Missões renovam à meia-noite
                 </p>
             </div>

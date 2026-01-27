@@ -27,10 +27,14 @@ export const MissionCard: React.FC<MissionCardProps> = ({
 
     return (
         <div
-            className={`relative bg-gradient-to-br from-[#f5e6c8] to-[#e6d5ac] rounded-lg p-3 border-2 shadow-md transition-all ${isCompleted
+            className={`relative rounded-lg p-3 border-2 shadow-md transition-all ${isCompleted
                 ? 'border-green-500/50 opacity-75'
-                : 'border-[#8b6c42] hover:border-[#c8a95c]'
+                : 'hover:brightness-105'
                 }`}
+            style={{
+                background: 'var(--theme-gradient)',
+                borderColor: isCompleted ? undefined : 'var(--theme-accent)'
+            }}
         >
             {/* Rank Badge */}
             <div
@@ -52,13 +56,19 @@ export const MissionCard: React.FC<MissionCardProps> = ({
             <div className="text-2xl mb-1">{typeIcon}</div>
 
             {/* Title */}
-            <h4 className="font-rpg font-bold text-[#3e2723] text-sm leading-tight mb-1 pr-6">
+            <h4
+                className="font-rpg font-bold text-sm leading-tight mb-1 pr-6"
+                style={{ color: 'var(--theme-primary)' }}
+            >
                 {mission.title}
             </h4>
 
             {/* Description */}
             {mission.description && (
-                <p className="text-[10px] text-[#5c4033]/70 mb-2 leading-tight">
+                <p
+                    className="text-[10px] mb-2 leading-tight"
+                    style={{ color: 'var(--theme-primary)', opacity: 0.7 }}
+                >
                     {mission.description}
                 </p>
             )}
@@ -67,13 +77,21 @@ export const MissionCard: React.FC<MissionCardProps> = ({
             <div className="flex items-center gap-3 mb-1">
                 <div className="flex items-center gap-1 text-xs">
                     <Sparkles size={12} className="text-purple-600" />
-                    <span className={`font-rpg ${hasBonuses ? 'text-orange-600 font-bold' : 'text-[#5c4033]'}`}>
+                    <span
+                        className={`font-rpg ${hasBonuses ? 'text-orange-600 font-bold' : ''}`}
+                        style={{ color: hasBonuses ? undefined : 'var(--theme-primary)' }}
+                    >
                         {displayXP} XP
                     </span>
                 </div>
                 <div className="flex items-center gap-1 text-xs">
                     <Coins size={12} className="text-yellow-600" />
-                    <span className="font-rpg text-[#5c4033]">{mission.gold_reward}</span>
+                    <span
+                        className="font-rpg"
+                        style={{ color: 'var(--theme-primary)' }}
+                    >
+                        {mission.gold_reward}
+                    </span>
                 </div>
             </div>
 
@@ -101,7 +119,11 @@ export const MissionCard: React.FC<MissionCardProps> = ({
                 <button
                     onClick={onComplete}
                     disabled={isLoading}
-                    className="w-full bg-[#8a1c1c] hover:bg-[#a52a2a] disabled:bg-gray-400 text-white py-1.5 rounded font-rpg text-xs font-bold transition-colors flex items-center justify-center gap-1"
+                    className="w-full disabled:bg-gray-400 text-white py-1.5 rounded font-rpg text-xs font-bold transition-colors flex items-center justify-center gap-1"
+                    style={{
+                        backgroundColor: 'var(--theme-primary)',
+                        opacity: isLoading ? 0.6 : 1
+                    }}
                 >
                     {isLoading ? (
                         <>
