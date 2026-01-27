@@ -56,7 +56,18 @@ export function applyThemeToDocument(theme: Theme): void {
 export function useThemes(user: User | null) {
     const [allThemes, setAllThemes] = useState<Theme[]>([]);
     const [ownedThemes, setOwnedThemes] = useState<UserTheme[]>([]);
-    const [activeTheme, setActiveTheme] = useState<Theme>(DEFAULT_THEME);
+    const [activeTheme, setActiveTheme] = useState<Theme>(() => {
+        // Try to load from local storage first to prevent flash
+        const cached = localStorage.getItem('active_theme_json');
+        if (cached) {
+            try {
+                return JSON.parse(cached);
+            } catch (e) {
+                console.error('Error parsing cached theme', e);
+            }
+        }
+        return DEFAULT_THEME;
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -99,12 +110,15 @@ export function useThemes(user: User | null) {
                 const active = themes?.find(t => t.id === profile.active_theme_id);
                 if (active) {
                     setActiveTheme(active);
+                    // Update cache
+                    localStorage.setItem('active_theme_json', JSON.stringify(active));
                 }
             } else {
                 // Set default theme if no active theme
                 const defaultTheme = themes?.find(t => t.is_default);
                 if (defaultTheme) {
                     setActiveTheme(defaultTheme);
+                    localStorage.setItem('active_theme_json', JSON.stringify(defaultTheme));
                 }
             }
 
@@ -194,6 +208,7 @@ export function useThemes(user: User | null) {
 
             if (theme) {
                 setActiveTheme(theme);
+                localStorage.setItem('active_theme_json', JSON.stringify(theme));
             }
 
             return true;

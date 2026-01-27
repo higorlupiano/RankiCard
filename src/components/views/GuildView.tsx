@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../../contexts/GameContext';
 import { useGuilds } from '../../hooks/useGuilds';
-import { Users, Crown, Plus, LogOut, Loader2, Trophy, Star, Shield, Trash2, Lock, Unlock, UserPlus, Check, X, QrCode, Copy } from 'lucide-react';
+import { Users, Crown, Plus, LogOut, Loader2, Trophy, Star, Shield, Trash2, Lock, Unlock, UserPlus, Check, X, Copy, Image } from 'lucide-react';
 import { ViewContainer } from '../ui';
 
 export const GuildView = () => {
@@ -22,6 +22,7 @@ export const GuildView = () => {
         acceptInvitation,
         rejectInvitation,
         toggleGuildPrivacy,
+        uploadGuildAvatar,
         refresh,
         clearError
     } = useGuilds(user);
@@ -38,6 +39,8 @@ export const GuildView = () => {
     const [sendingInvite, setSendingInvite] = useState(false);
     const [togglingPrivacy, setTogglingPrivacy] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [updatingAvatar, setUpdatingAvatar] = useState(false);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     if (!user) return null;
 
@@ -106,6 +109,25 @@ export const GuildView = () => {
         clearError();
         await toggleGuildPrivacy();
         setTogglingPrivacy(false);
+    };
+
+    const handleAvatarClick = () => {
+        if (isLeader) {
+            fileInputRef.current?.click();
+        }
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUpdatingAvatar(true);
+        clearError();
+        const success = await uploadGuildAvatar(file);
+        setUpdatingAvatar(false);
+
+        // Reset input value to allow selecting same file again if needed
+        if (e.target.value) e.target.value = '';
     };
 
     const copyUserId = () => {
@@ -252,9 +274,30 @@ export const GuildView = () => {
                 {/* Guild Header */}
                 <div className="bg-gradient-to-r from-purple-900/50 to-indigo-900/50 rounded-lg p-4 mb-4 border border-purple-500/30">
                     <div className="flex items-center gap-3">
-                        <div className="w-16 h-16 rounded-lg bg-purple-600/50 flex items-center justify-center text-3xl border border-purple-400/50">
+                        <div
+                            className={`w-16 h-16 rounded-lg bg-purple-600/50 flex items-center justify-center text-3xl border border-purple-400/50 relative overflow-hidden group ${isLeader ? 'cursor-pointer hover:border-yellow-400' : ''}`}
+                            onClick={handleAvatarClick}
+                        >
+                            {isLeader && (
+                                <>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+                                        {updatingAvatar ? (
+                                            <Loader2 className="animate-spin text-yellow-400" size={24} />
+                                        ) : (
+                                            <Image className="text-yellow-400" size={24} />
+                                        )}
+                                    </div>
+                                </>
+                            )}
                             {myGuild.avatar_url ? (
-                                <img src={myGuild.avatar_url} alt={myGuild.name} className="w-full h-full object-cover rounded-lg" />
+                                <img src={myGuild.avatar_url} alt={myGuild.name} className="w-full h-full object-cover" />
                             ) : (
                                 '⚔️'
                             )}
@@ -305,8 +348,8 @@ export const GuildView = () => {
                                 onClick={handleTogglePrivacy}
                                 disabled={togglingPrivacy}
                                 className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg transition-colors ${myGuild.is_public
-                                        ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50'
-                                        : 'bg-gray-700/30 text-gray-400 hover:bg-gray-700/50'
+                                    ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50'
+                                    : 'bg-gray-700/30 text-gray-400 hover:bg-gray-700/50'
                                     }`}
                             >
                                 {togglingPrivacy ? (

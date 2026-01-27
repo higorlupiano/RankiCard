@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useGame } from '../../contexts/GameContext';
 import { useThemes, Theme, applyThemeToDocument } from '../../hooks/useThemes';
+import { useTheme } from '../../contexts/ThemeContext';
 import { ViewContainer } from '../ui';
 import { Palette, Check, Lock, Loader2, Coins } from 'lucide-react';
 
 export const ThemesView = () => {
     const { user, profile, refreshProfile } = useGame();
+    const { activeTheme: contextActiveTheme } = useTheme(); // Get theme from global context
     const {
         allThemes,
         activeTheme,
@@ -46,10 +48,11 @@ export const ThemesView = () => {
     };
 
     if (loading) {
+        // Use the theme from context (which is already loaded globally) for the loading screen
         return (
             <ViewContainer centered>
-                <Loader2 className="animate-spin mr-2 text-yellow-100" />
-                <span className="text-yellow-100">Carregando temas...</span>
+                <Loader2 className="animate-spin mr-2" style={{ color: contextActiveTheme.primary_color }} />
+                <span style={{ color: contextActiveTheme.primary_color }}>Carregando temas...</span>
             </ViewContainer>
         );
     }

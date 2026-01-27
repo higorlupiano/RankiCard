@@ -92,19 +92,32 @@ export function useGuilds(user: User | null) {
                     .single();
 
                 if (guild) {
+                    // Update local state first
                     setMyGuild(guild);
 
                     // Load guild members
-                    const { data: members } = await supabase
+                    const { data: members, count } = await supabase
                         .from('guild_members')
                         .select(`
                             *,
                             profile:profiles(display_name, avatar_url, current_level, total_xp)
-                        `)
+                        `, { count: 'exact' })
                         .eq('guild_id', guild.id)
                         .order('contribution_xp', { ascending: false });
 
                     setGuildMembers(members || []);
+
+                    // Sync member count if different
+                    if (members && guild.member_count !== members.length) {
+                        console.log(`Syncing member count: stored ${guild.member_count}, actual ${members.length}`);
+                        await supabase
+                            .from('guilds')
+                            .update({ member_count: members.length })
+                            .eq('id', guild.id);
+
+                        // Update local state
+                        setMyGuild(prev => prev ? { ...prev, member_count: members.length } : null);
+                    }
                 }
             } else {
                 setMyGuild(null);
@@ -132,7 +145,6 @@ export function useGuilds(user: User | null) {
             if (leaderboardData) {
                 setLeaderboard(leaderboardData.map((g, i) => ({ ...g, rank: i + 1 })));
             }
-
         } catch (err) {
             console.error('Error loading guilds:', err);
             setError('Erro ao carregar guildas');
@@ -509,6 +521,64 @@ export function useGuilds(user: User | null) {
         }
     }, [user, myGuild, isLeader]);
 
+    // Upload guild avatar (leader only)
+    const uploadGuildAvatar = useCallback(async (file: File): Promise<boolean> => {
+        if (!user || !myGuild) return false;
+
+        if (!isLeader) {
+            setError('Apenas o líder pode alterar a imagem da guilda');
+            return false;
+        }
+
+        try {
+            // Validate file
+            if (!file.type.startsWith('image/')) {
+                setError('Por favor, selecione uma imagem.');
+                return false;
+            }
+
+            if (file.size > 2 * 1024 * 1024) { // 2MB
+                setError('A imagem deve ter no máximo 2MB.');
+                return false;
+            }
+
+            // Generate unique filename
+            const fileExt = file.name.split('.').pop();
+            const fileName = `guild_${myGuild.id}_${Date.now()}.${fileExt}`;
+
+            // Upload to Supabase Storage (using 'avatars' bucket, organization folder recommended but trying root or guild specific prefix)
+            // Assuming 'avatars' bucket exists as used in user profile
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(fileName, file, { upsert: true });
+
+            if (uploadError) throw uploadError;
+
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(fileName);
+
+            // Add cache buster
+            const urlWithCacheBuster = `${publicUrl}?t=${Date.now()}`;
+
+            // Update guild record
+            const { error: updateError } = await supabase
+                .from('guilds')
+                .update({ avatar_url: urlWithCacheBuster })
+                .eq('id', myGuild.id);
+
+            if (updateError) throw updateError;
+
+            setMyGuild({ ...myGuild, avatar_url: urlWithCacheBuster });
+            return true;
+        } catch (err: any) {
+            console.error('Error updating guild avatar:', err);
+            setError(err.message || 'Erro ao atualizar imagem da guilda');
+            return false;
+        }
+    }, [user, myGuild, isLeader]);
+
     // Contribute XP to guild (called when user gains XP)
     const contributeXP = useCallback(async (xpAmount: number) => {
         if (!user || !myGuild) return;
@@ -559,6 +629,7 @@ export function useGuilds(user: User | null) {
         acceptInvitation,
         rejectInvitation,
         toggleGuildPrivacy,
+        uploadGuildAvatar,
         contributeXP,
         refresh: loadData,
         clearError,
