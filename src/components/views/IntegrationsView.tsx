@@ -1,20 +1,16 @@
 import React from 'react';
 import { useGame } from '../../contexts/GameContext';
-import { StravaPanel, SpotifyPanel, StudyTimer } from '../game';
+import { StravaPanel, StudyTimer } from '../game';
 import { ViewContainer } from '../ui';
 export const IntegrationsView = () => {
     const {
         profile,
         syncMsg,
-        spotifySyncMsg,
         isStravaSyncing,
         stravaCooldownRemaining,
         handleStravaConnect,
         handleStravaSync,
         handleStravaDisconnect,
-        handleSpotifyConnect,
-        handleSpotifySync,
-        handleSpotifyDisconnect,
         // Timer
         todayStudyXP, // Wait, is this in context?
         handleStudyComplete,
@@ -44,13 +40,6 @@ export const IntegrationsView = () => {
                     isSyncDisabled={stravaCooldownRemaining > 0}
                     isLoading={isStravaSyncing}
                     cooldownRemaining={stravaCooldownRemaining}
-                />
-                <SpotifyPanel
-                    connected={!!profile?.spotify_refresh_token}
-                    syncMessage={spotifySyncMsg}
-                    onConnect={handleSpotifyConnect}
-                    onSync={handleSpotifySync}
-                    onDisconnect={handleSpotifyDisconnect}
                 />
                 <StudyTimer
                     todayStudyXP={currentTodayStudyXP}
