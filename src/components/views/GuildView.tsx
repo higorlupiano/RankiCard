@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../../contexts/GameContext';
 import { useGuilds } from '../../hooks/useGuilds';
-import { Users, Crown, Plus, LogOut, Loader2, Trophy, Star, Shield } from 'lucide-react';
+import { Users, Crown, Plus, LogOut, Loader2, Trophy, Star, Shield, Trash2, Lock, Unlock, UserPlus, Check, X, QrCode, Copy } from 'lucide-react';
 import { ViewContainer } from '../ui';
 
 export const GuildView = () => {
@@ -10,44 +10,108 @@ export const GuildView = () => {
         myGuild,
         guildMembers,
         leaderboard,
+        pendingInvitations,
         loading,
         error,
+        isLeader,
         createGuild,
         joinGuild,
         leaveGuild,
-        refresh
+        deleteGuild,
+        sendInvitation,
+        acceptInvitation,
+        rejectInvitation,
+        toggleGuildPrivacy,
+        refresh,
+        clearError
     } = useGuilds(user);
 
     const [showCreate, setShowCreate] = useState(false);
     const [newGuildName, setNewGuildName] = useState('');
     const [newGuildDesc, setNewGuildDesc] = useState('');
+    const [newGuildPublic, setNewGuildPublic] = useState(false);
     const [creating, setCreating] = useState(false);
     const [joining, setJoining] = useState<string | null>(null);
+    const [deleting, setDeleting] = useState(false);
+    const [showInvite, setShowInvite] = useState(false);
+    const [inviteUserId, setInviteUserId] = useState('');
+    const [sendingInvite, setSendingInvite] = useState(false);
+    const [togglingPrivacy, setTogglingPrivacy] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     if (!user) return null;
 
     const handleCreateGuild = async () => {
         if (!newGuildName.trim()) return;
         setCreating(true);
-        const success = await createGuild(newGuildName.trim(), newGuildDesc.trim());
+        clearError();
+        const success = await createGuild(newGuildName.trim(), newGuildDesc.trim(), newGuildPublic);
         if (success) {
             setShowCreate(false);
             setNewGuildName('');
             setNewGuildDesc('');
+            setNewGuildPublic(false);
         }
         setCreating(false);
     };
 
     const handleJoinGuild = async (guildId: string) => {
         setJoining(guildId);
+        clearError();
         await joinGuild(guildId);
         setJoining(null);
     };
 
     const handleLeaveGuild = async () => {
         if (confirm('Tem certeza que deseja sair da guilda?')) {
+            clearError();
             await leaveGuild();
         }
+    };
+
+    const handleDeleteGuild = async () => {
+        if (confirm('ATENÇÃO: Isso irá deletar a guilda permanentemente e remover todos os membros. Continuar?')) {
+            setDeleting(true);
+            clearError();
+            await deleteGuild();
+            setDeleting(false);
+        }
+    };
+
+    const handleSendInvite = async () => {
+        if (!inviteUserId.trim()) return;
+        setSendingInvite(true);
+        clearError();
+        const success = await sendInvitation(inviteUserId.trim());
+        if (success) {
+            setInviteUserId('');
+            setShowInvite(false);
+            alert('Convite enviado com sucesso!');
+        }
+        setSendingInvite(false);
+    };
+
+    const handleAcceptInvite = async (invitationId: string) => {
+        clearError();
+        await acceptInvitation(invitationId);
+    };
+
+    const handleRejectInvite = async (invitationId: string) => {
+        clearError();
+        await rejectInvitation(invitationId);
+    };
+
+    const handleTogglePrivacy = async () => {
+        setTogglingPrivacy(true);
+        clearError();
+        await toggleGuildPrivacy();
+        setTogglingPrivacy(false);
+    };
+
+    const copyUserId = () => {
+        navigator.clipboard.writeText(user.id);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     if (loading) {
@@ -55,6 +119,128 @@ export const GuildView = () => {
             <ViewContainer centered>
                 <Loader2 className="animate-spin mr-2 text-yellow-100" />
                 <span className="text-yellow-100">Carregando guildas...</span>
+            </ViewContainer>
+        );
+    }
+
+    // Show pending invitations if user is not in a guild
+    if (!myGuild && pendingInvitations.length > 0) {
+        return (
+            <ViewContainer>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2 text-yellow-100">
+                        <Users size={24} />
+                        <span className="font-rpg text-lg">Guildas</span>
+                    </div>
+                </div>
+
+                {error && (
+                    <div className="mb-4 p-2 bg-red-900/30 border border-red-500/50 rounded-lg text-red-300 text-sm">
+                        {error}
+                    </div>
+                )}
+
+                {/* Pending Invitations */}
+                <div className="mb-6">
+                    <h3 className="font-rpg text-sm text-yellow-100 mb-3 flex items-center gap-2">
+                        <UserPlus size={16} />
+                        Convites Pendentes
+                    </h3>
+                    <div className="space-y-2">
+                        {pendingInvitations.map(invite => (
+                            <div
+                                key={invite.id}
+                                className="p-3 rounded-lg bg-purple-900/30 border border-purple-500/30"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h4 className="font-rpg text-sm text-purple-200">
+                                            {invite.guild?.name || 'Guilda'}
+                                        </h4>
+                                        <p className="text-xs text-gray-400">
+                                            {invite.guild?.description || 'Sem descrição'}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => handleAcceptInvite(invite.id)}
+                                            className="p-2 rounded-lg bg-green-600/50 text-green-200 hover:bg-green-600 transition-colors"
+                                        >
+                                            <Check size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleRejectInvite(invite.id)}
+                                            className="p-2 rounded-lg bg-red-600/50 text-red-200 hover:bg-red-600 transition-colors"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Show leaderboard below invitations */}
+                <h3 className="font-rpg text-sm text-yellow-100 mb-2 flex items-center gap-2">
+                    <Trophy size={16} />
+                    Top Guildas
+                </h3>
+                <div className="space-y-2">
+                    {leaderboard.map(guild => (
+                        <div
+                            key={guild.id}
+                            className="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-700/30"
+                        >
+                            <div className={`
+                                w-8 h-8 rounded-full flex items-center justify-center font-rpg font-bold text-sm
+                                ${guild.rank === 1 ? 'bg-yellow-500 text-black' :
+                                    guild.rank === 2 ? 'bg-gray-300 text-black' :
+                                        guild.rank === 3 ? 'bg-amber-600 text-white' :
+                                            'bg-gray-700 text-gray-300'}
+                            `}>
+                                {guild.rank}
+                            </div>
+                            <div className="w-12 h-12 rounded-lg bg-purple-600/30 flex items-center justify-center text-xl border border-purple-500/30">
+                                ⚔️
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h4 className="font-rpg text-sm text-gray-200 truncate flex items-center gap-1">
+                                    {guild.name}
+                                    {guild.is_public ? (
+                                        <Unlock size={12} className="text-green-400" />
+                                    ) : (
+                                        <Lock size={12} className="text-gray-500" />
+                                    )}
+                                </h4>
+                                <div className="flex items-center gap-3 text-xs text-gray-500">
+                                    <span className="flex items-center gap-1">
+                                        <Star size={10} className="text-yellow-400" />
+                                        {guild.total_xp.toLocaleString()} XP
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <Users size={10} />
+                                        {guild.member_count}/6
+                                    </span>
+                                </div>
+                            </div>
+                            {guild.is_public && (
+                                <button
+                                    onClick={() => handleJoinGuild(guild.id)}
+                                    disabled={joining === guild.id}
+                                    className="px-3 py-1.5 rounded-lg bg-purple-600/50 text-purple-200 text-xs hover:bg-purple-600 transition-colors disabled:opacity-50"
+                                >
+                                    {joining === guild.id ? (
+                                        <Loader2 className="animate-spin" size={14} />
+                                    ) : (
+                                        'Entrar'
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                </div>
             </ViewContainer>
         );
     }
@@ -74,7 +260,12 @@ export const GuildView = () => {
                             )}
                         </div>
                         <div className="flex-1">
-                            <h2 className="font-rpg text-lg text-yellow-100">{myGuild.name}</h2>
+                            <div className="flex items-center gap-2">
+                                <h2 className="font-rpg text-lg text-yellow-100">{myGuild.name}</h2>
+                                {isLeader && (
+                                    <Crown size={16} className="text-yellow-400" />
+                                )}
+                            </div>
                             <p className="text-sm text-gray-400">{myGuild.description || 'Sem descrição'}</p>
                             <div className="flex items-center gap-4 mt-1 text-xs">
                                 <span className="flex items-center gap-1 text-yellow-400">
@@ -83,10 +274,101 @@ export const GuildView = () => {
                                 </span>
                                 <span className="flex items-center gap-1 text-purple-300">
                                     <Users size={12} />
-                                    {myGuild.member_count}/{myGuild.max_members}
+                                    {myGuild.member_count}/6
+                                </span>
+                                <span className={`flex items-center gap-1 ${myGuild.is_public ? 'text-green-400' : 'text-gray-400'}`}>
+                                    {myGuild.is_public ? <Unlock size={12} /> : <Lock size={12} />}
+                                    {myGuild.is_public ? 'Pública' : 'Privada'}
                                 </span>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {error && (
+                    <div className="mb-4 p-2 bg-red-900/30 border border-red-500/50 rounded-lg text-red-300 text-sm">
+                        {error}
+                    </div>
+                )}
+
+                {/* Leader Controls */}
+                {isLeader && (
+                    <div className="mb-4 p-3 bg-yellow-900/20 rounded-lg border border-yellow-500/30">
+                        <h3 className="font-rpg text-sm text-yellow-200 mb-3 flex items-center gap-2">
+                            <Crown size={14} />
+                            Controles do Líder
+                        </h3>
+
+                        <div className="space-y-2">
+                            {/* Privacy Toggle */}
+                            <button
+                                onClick={handleTogglePrivacy}
+                                disabled={togglingPrivacy}
+                                className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg transition-colors ${myGuild.is_public
+                                        ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50'
+                                        : 'bg-gray-700/30 text-gray-400 hover:bg-gray-700/50'
+                                    }`}
+                            >
+                                {togglingPrivacy ? (
+                                    <Loader2 className="animate-spin" size={16} />
+                                ) : (
+                                    <>
+                                        {myGuild.is_public ? <Unlock size={16} /> : <Lock size={16} />}
+                                        {myGuild.is_public ? 'Guilda Pública (clique para tornar privada)' : 'Guilda Privada (clique para tornar pública)'}
+                                    </>
+                                )}
+                            </button>
+
+                            {/* Invite Button */}
+                            <button
+                                onClick={() => setShowInvite(!showInvite)}
+                                className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-blue-900/30 text-blue-400 hover:bg-blue-900/50 transition-colors"
+                            >
+                                <UserPlus size={16} />
+                                Convidar Membro
+                            </button>
+
+                            {/* Invite Form */}
+                            {showInvite && (
+                                <div className="p-3 bg-black/30 rounded-lg">
+                                    <p className="text-xs text-gray-400 mb-2">
+                                        Digite o ID do usuário para convidar. O usuário pode copiar seu ID na tela do perfil.
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="ID do usuário"
+                                            value={inviteUserId}
+                                            onChange={(e) => setInviteUserId(e.target.value)}
+                                            className="flex-1 px-3 py-2 bg-black/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-sm"
+                                        />
+                                        <button
+                                            onClick={handleSendInvite}
+                                            disabled={!inviteUserId.trim() || sendingInvite}
+                                            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                        >
+                                            {sendingInvite ? <Loader2 className="animate-spin" size={16} /> : 'Enviar'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Your User ID (for sharing) */}
+                <div className="mb-4 p-3 bg-black/30 rounded-lg border border-gray-700/30">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-xs text-gray-400">Seu ID (compartilhe para receber convites)</p>
+                            <p className="font-mono text-sm text-gray-200">{user.id}</p>
+                        </div>
+                        <button
+                            onClick={copyUserId}
+                            className="p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 transition-colors"
+                        >
+                            {copied ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
+                        </button>
                     </div>
                 </div>
 
@@ -94,7 +376,7 @@ export const GuildView = () => {
                 <div className="mb-4">
                     <h3 className="font-rpg text-sm text-yellow-100 mb-2 flex items-center gap-2">
                         <Users size={16} />
-                        Membros
+                        Membros ({myGuild.member_count}/6)
                     </h3>
                     <div className="space-y-2">
                         {guildMembers.map(member => (
@@ -130,14 +412,35 @@ export const GuildView = () => {
                     </div>
                 </div>
 
-                {/* Leave button */}
-                <button
-                    onClick={handleLeaveGuild}
-                    className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors"
-                >
-                    <LogOut size={16} />
-                    Sair da Guilda
-                </button>
+                {/* Action Buttons */}
+                <div className="space-y-2">
+                    {!isLeader && (
+                        <button
+                            onClick={handleLeaveGuild}
+                            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors"
+                        >
+                            <LogOut size={16} />
+                            Sair da Guilda
+                        </button>
+                    )}
+
+                    {isLeader && (
+                        <button
+                            onClick={handleDeleteGuild}
+                            disabled={deleting}
+                            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors"
+                        >
+                            {deleting ? (
+                                <Loader2 className="animate-spin" size={16} />
+                            ) : (
+                                <>
+                                    <Trash2 size={16} />
+                                    Deletar Guilda
+                                </>
+                            )}
+                        </button>
+                    )}
+                </div>
             </ViewContainer>
         );
     }
@@ -166,6 +469,22 @@ export const GuildView = () => {
                 </div>
             )}
 
+            {/* Your User ID */}
+            <div className="mb-4 p-3 bg-black/30 rounded-lg border border-gray-700/30">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs text-gray-400">Seu ID (compartilhe para receber convites)</p>
+                        <p className="font-mono text-sm text-gray-200 truncate">{user.id}</p>
+                    </div>
+                    <button
+                        onClick={copyUserId}
+                        className="p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 transition-colors"
+                    >
+                        {copied ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
+                    </button>
+                </div>
+            </div>
+
             {/* Create Guild Form */}
             {showCreate && (
                 <div className="mb-4 p-4 bg-purple-900/30 rounded-lg border border-purple-500/30">
@@ -186,6 +505,18 @@ export const GuildView = () => {
                         rows={2}
                         maxLength={100}
                     />
+                    <label className="flex items-center gap-2 mb-3 text-sm text-gray-300 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={newGuildPublic}
+                            onChange={(e) => setNewGuildPublic(e.target.checked)}
+                            className="w-4 h-4 rounded border-gray-600 bg-black/50 text-purple-600 focus:ring-purple-500"
+                        />
+                        <span className="flex items-center gap-1">
+                            {newGuildPublic ? <Unlock size={14} /> : <Lock size={14} />}
+                            Guilda Pública (qualquer pessoa pode entrar)
+                        </span>
+                    </label>
                     <button
                         onClick={handleCreateGuild}
                         disabled={!newGuildName.trim() || creating}
@@ -228,7 +559,14 @@ export const GuildView = () => {
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                            <h4 className="font-rpg text-sm text-gray-200 truncate">{guild.name}</h4>
+                            <h4 className="font-rpg text-sm text-gray-200 truncate flex items-center gap-1">
+                                {guild.name}
+                                {guild.is_public ? (
+                                    <Unlock size={12} className="text-green-400" />
+                                ) : (
+                                    <Lock size={12} className="text-gray-500" />
+                                )}
+                            </h4>
                             <div className="flex items-center gap-3 text-xs text-gray-500">
                                 <span className="flex items-center gap-1">
                                     <Star size={10} className="text-yellow-400" />
@@ -236,23 +574,29 @@ export const GuildView = () => {
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <Users size={10} />
-                                    {guild.member_count}
+                                    {guild.member_count}/6
                                 </span>
                             </div>
                         </div>
 
-                        {/* Join button */}
-                        <button
-                            onClick={() => handleJoinGuild(guild.id)}
-                            disabled={joining === guild.id}
-                            className="px-3 py-1.5 rounded-lg bg-purple-600/50 text-purple-200 text-xs hover:bg-purple-600 transition-colors disabled:opacity-50"
-                        >
-                            {joining === guild.id ? (
-                                <Loader2 className="animate-spin" size={14} />
-                            ) : (
-                                'Entrar'
-                            )}
-                        </button>
+                        {/* Join button - only for public guilds */}
+                        {guild.is_public ? (
+                            <button
+                                onClick={() => handleJoinGuild(guild.id)}
+                                disabled={joining === guild.id}
+                                className="px-3 py-1.5 rounded-lg bg-purple-600/50 text-purple-200 text-xs hover:bg-purple-600 transition-colors disabled:opacity-50"
+                            >
+                                {joining === guild.id ? (
+                                    <Loader2 className="animate-spin" size={14} />
+                                ) : (
+                                    'Entrar'
+                                )}
+                            </button>
+                        ) : (
+                            <span className="px-3 py-1.5 text-xs text-gray-500">
+                                Privada
+                            </span>
+                        )}
                     </div>
                 ))}
 

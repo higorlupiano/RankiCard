@@ -30,11 +30,11 @@ export const StatsView = () => {
 
         // Add XP from activities
         activities.forEach(act => {
-            if (act.xp_change && act.xp_change > 0) {
+            if (act.xp_amount && act.xp_amount > 0) {
                 const date = new Date(act.created_at);
                 const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
                 if (xpByDate.hasOwnProperty(dateStr)) {
-                    xpByDate[dateStr] += act.xp_change;
+                    xpByDate[dateStr] += act.xp_amount;
                 }
             }
         });

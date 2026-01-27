@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGame } from '../../contexts/GameContext';
-import { useThemes, Theme } from '../../hooks/useThemes';
+import { useThemes, Theme, applyThemeToDocument } from '../../hooks/useThemes';
 import { ViewContainer } from '../ui';
 import { Palette, Check, Lock, Loader2, Coins } from 'lucide-react';
 
@@ -34,7 +34,14 @@ export const ThemesView = () => {
 
     const handleActivate = async (themeId: string) => {
         setActivating(themeId);
-        await activateTheme(themeId);
+        const success = await activateTheme(themeId);
+        if (success) {
+            // Apply theme colors globally
+            const theme = allThemes.find(t => t.id === themeId);
+            if (theme) {
+                applyThemeToDocument(theme);
+            }
+        }
         setActivating(null);
     };
 

@@ -78,6 +78,7 @@ export function useActivityLog(user: User | null) {
             case 'strava_sync': return '🏃';
             case 'study': return '📚';
             case 'streak': return '🔥';
+            case 'mission': return '🎯';
             default: return '📝';
         }
     };
@@ -91,6 +92,7 @@ export function useActivityLog(user: User | null) {
             case 'strava_sync': return 'text-orange-400';
             case 'study': return 'text-blue-400';
             case 'streak': return 'text-red-400';
+            case 'mission': return 'text-green-400';
             default: return 'text-gray-400';
         }
     };

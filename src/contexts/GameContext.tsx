@@ -19,7 +19,7 @@ interface GameContextType {
     signInWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
     updateProfile: (updates: Partial<Profile>) => Promise<void>;
-    addXP: (amount: number) => Promise<{ newTotalXP: number; newLevel: number; leveledUp: boolean } | undefined>;
+    addXP: (amount: number, source?: string, description?: string) => Promise<{ newTotalXP: number; newLevel: number; leveledUp: boolean } | undefined>;
     addStudyXP: (amount: number) => Promise<boolean>;
     refreshProfile: () => void;
 

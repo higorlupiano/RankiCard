@@ -43,6 +43,16 @@ export const DEFAULT_THEME: Theme = {
     is_default: true,
 };
 
+// Apply theme colors to CSS variables on document root
+export function applyThemeToDocument(theme: Theme): void {
+    const root = document.documentElement;
+    root.style.setProperty('--theme-primary', theme.primary_color);
+    root.style.setProperty('--theme-secondary', theme.secondary_color);
+    root.style.setProperty('--theme-accent', theme.accent_color);
+    root.style.setProperty('--theme-text', theme.text_color);
+    root.style.setProperty('--theme-gradient', theme.background_gradient);
+}
+
 export function useThemes(user: User | null) {
     const [allThemes, setAllThemes] = useState<Theme[]>([]);
     const [ownedThemes, setOwnedThemes] = useState<UserTheme[]>([]);

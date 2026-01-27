@@ -21,7 +21,7 @@ export const MissionsView = () => {
     const rank = getRank(currentLevel);
 
     const handleMissionComplete = async (xp: number, gold: number, missionName?: string) => {
-        await addXP(xp);
+        await addXP(xp, 'mission', `Missão: ${missionName || 'Completada'}`);
         await updateProfile({ gold: (profile?.gold || 0) + gold });
         refreshProfile();
 
